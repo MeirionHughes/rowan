@@ -1,0 +1,15 @@
+.github
+.vscode
+.editorconfig
+.nyc_output
+.npmignore
+.travis.yml
+src
+spec
+test
+coverage
+tsconfig.json
+tsfmt.json
+tslint.json
+example.js
+gulpfile.js
