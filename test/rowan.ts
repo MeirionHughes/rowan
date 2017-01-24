@@ -267,7 +267,7 @@ describe("Chained Middleware", () => {
 
   it("when last task in chain returns false, then termiate processing", async () => {
     let rowan = new Rowan<Context>();
-    var called = [false,];
+    var called = [false];
 
     rowan.use(
       async (ctx) => {

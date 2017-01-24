@@ -14,7 +14,7 @@
     "minify": "minify ./lib/rowan.js >> ./lib/rowan.min.js",
     "prepare-release": "npm test",
     "clean": "rimraf coverage .nyc_output lib",
-    "lint": "tslint ./src/*.ts !./lib/*.d.ts"
+    "lint": "tslint ./src/*.ts ./test/*.ts"
   },
   "repository": {
     "type": "git",
