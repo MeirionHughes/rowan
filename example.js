@@ -11,7 +11,7 @@ const main = async function () {
   });
 
   //add error handlers
-  app.use((err, ctx) => {
+  app.use((ctx, err) => {
     console.log("handle errors...");
     return true; // clear error - continue;           
   });
@@ -26,7 +26,7 @@ const main = async function () {
   // add chains and predicates
   app.use(
     predicate,
-    (err, ctx) => {
+    (ctx, err) => {
       console.log("abort task chains...");
       return false; // abort chain;
     },
@@ -34,14 +34,14 @@ const main = async function () {
 
   // Nest applications / routes / processors
   app.use({
-    process: async function (err, ctx) {
+    process: async function (ctx, err) {
       if (err != undefined)
         console.log("handle error");
       else
         console.log("handle ctx");
 
       //Run a chain manually and return its result
-      return await Rowan.execute(undefined, ctx, [
+      return await Rowan.execute(ctx, undefined, [
         (_) => { console.log("moo"); },
         (_) => false // kill execution through stack
       ]);

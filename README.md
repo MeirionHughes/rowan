@@ -10,7 +10,7 @@ A lightweight async/await task-middleware library.
 [![codecov](https://codecov.io/gh/MeirionHughes/rowan/branch/master/graph/badge.svg)](https://codecov.io/gh/MeirionHughes/rowan)
 
 ## Install
-* `npm install rowan` - installs es2015 version with dependency to `tslib@^1.5.0`
+* `npm install rowan`
 
 ## Usage
 
@@ -29,7 +29,7 @@ const main = async function () {
   });
 
   //add error handlers
-  app.use((err, ctx) => {
+  app.use((ctx, err) => {
     console.log("handle errors...");
     return true; // clear error - continue;           
   });
@@ -44,7 +44,7 @@ const main = async function () {
   // add chains and predicates
   app.use(
     predicate,
-    (err, ctx) => {
+    (ctx, err) => {
       console.log("abort task chains...");
       return false; // abort chain;
     },
@@ -53,14 +53,14 @@ const main = async function () {
 
   // Nest applications / routes / processors
   app.use({
-    process: async function (err, ctx) {
+    process: async function (ctx, err) {
       if (err != undefined)
         console.log("handle error");
       else
         console.log("handle ctx");
 
       //Run a chain manually and return its result
-      return await Rowan.execute(undefined, ctx, [
+      return await Rowan.execute(ctx, err, [
         (_) => { console.log("moo");},
         (_) => false // kill execution through stack
       ]);
@@ -91,11 +91,6 @@ there is an es2017 example in the repo that you can run with:
 gulp compile:source:es2017
 node --harmony-async-await example
 ```
-
-## Roadmap
-
-* lock api and release 1.0
-* publish es2017 build (native await/async)
 
 ## Credits
 "Rowan" Icon courtesy of [The Noun Project](https://thenounproject.com/), by [ludmil](https://thenounproject.com/Maludk), under [CC 3.0](http://creativecommons.org/licenses/by/3.0/us/)
