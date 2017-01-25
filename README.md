@@ -96,8 +96,8 @@ node --harmony-async-await example
 "Rowan" Icon courtesy of [The Noun Project](https://thenounproject.com/), by [ludmil](https://thenounproject.com/Maludk), under [CC 3.0](http://creativecommons.org/licenses/by/3.0/us/)
 
 [npm-url]: https://npmjs.org/package/rowan
-[npm-image]: http://img.shields.io/npm/v/rowan.svg
-[npm-downloads]: http://img.shields.io/npm/dm/rowan.svg
+[npm-image]: https://img.shields.io/npm/v/rowan.svg
+[npm-downloads]: https://img.shields.io/npm/dm/rowan.svg
 [travis-url]: https://travis-ci.org/MeirionHughes/rowan
 [travis-image]: https://img.shields.io/travis/MeirionHughes/rowan/master.svg
 
