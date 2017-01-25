@@ -13,17 +13,14 @@ export interface IRowan<TCtx> extends IProcessor<TCtx> {
 }
 
 export class Rowan<TCtx> implements IRowan<TCtx> {
-  private _middleware: Handler<TCtx>[] = [];  /** execute the middleware chain with the given ctx */
-
+  private _middleware: Handler<TCtx>[] = [];
   process(ctx: TCtx): Promise<TaskResult>
   process(ctx: TCtx, err: BaseError | undefined): Promise<TaskResult>
   process(ctx: TCtx, err?: BaseError | undefined): Promise<TaskResult> {
     return Rowan.execute(ctx, err, this._middleware);
   }
-
-  /** append a handler, a sequence or a chain processor to the middleware*/
   use(handler: Handler<TCtx>, ...handlers: Handler<TCtx>[]): this {
-    if (isChain<TCtx>(handler) || handlers.length == 0) {
+    if (isProcessor<TCtx>(handler) || handlers.length == 0) {
       this._middleware.push(handler);
     }
     else {
@@ -39,15 +36,12 @@ export class Rowan<TCtx> implements IRowan<TCtx> {
     }
     return this;
   }
-
-  /** asynchronously execute a middleware chain */
   static async execute<Ctx>(ctx: Ctx, err: BaseError | undefined, handlers: Handler<Ctx>[]): Promise<TaskResult> {
     let result: TaskResult = err;
     for (let handler = handlers[0], i = 0; i < handlers.length; handler = handlers[++i]) {
       const isLast = i == handlers.length - 1;
-      const last = result;
       try {
-        if (isChain(handler)) {
+        if (isProcessor(handler)) {
           result = await handler.process(ctx, err);
         } else if (isErrorHandler<Ctx>(handler)) {
           if (err != undefined) {
@@ -57,10 +51,10 @@ export class Rowan<TCtx> implements IRowan<TCtx> {
           result = await handler(ctx);
         }
         if (typeof (result) == "boolean") {
-          if (result == false) {
-            return isLast ? false : err; // abort chain - allow continuation after chain
+          if (result === false) {
+            return isLast ? false : err;
           }
-          else { // returning true clears error; 
+          else {
             err = undefined;
             result = undefined;
           }
@@ -79,6 +73,6 @@ function isErrorHandler<TCtx>(handler: Handler<TCtx>): handler is ErrorHandler<T
   return typeof (handler) == "function" && handler.length == 2;
 }
 
-function isChain<TCtx>(handler: Handler<TCtx> | IProcessor<TCtx>): handler is IProcessor<TCtx> {
+function isProcessor<TCtx>(handler: Handler<TCtx> | IProcessor<TCtx>): handler is IProcessor<TCtx> {
   return typeof (handler) == "object" && typeof (handler.process) == "function" && handler.process.length == 2;
 }
