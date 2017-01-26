@@ -39,7 +39,6 @@ export class Rowan<TCtx> implements IRowan<TCtx> {
   static async execute<Ctx>(ctx: Ctx, err: BaseError | undefined, handlers: Handler<Ctx>[]): Promise<TaskResult> {
     let result: TaskResult = err;
     for (let handler = handlers[0], i = 0; i < handlers.length; handler = handlers[++i]) {
-      const isLast = i == handlers.length - 1;
       try {
         if (isProcessor(handler)) {
           result = await handler.process(ctx, err);
@@ -52,7 +51,7 @@ export class Rowan<TCtx> implements IRowan<TCtx> {
         }
         if (typeof (result) == "boolean") {
           if (result === false) {
-            return isLast ? false : err;
+            return (i == handlers.length - 1) ? false : err;
           }
           else {
             err = undefined;
