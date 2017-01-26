@@ -275,7 +275,7 @@ describe("Chained Middleware", () => {
       },
       async (ctx) => {
         return false;
-    });
+      });
 
     rowan.use(async (ctx) => {
       assert.fail();
