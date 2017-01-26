@@ -12,6 +12,21 @@ class DerivedError extends Error {
   status: number = 404;
 }
 
+describe("General", () => {
+  it("when constructor without param is called then middleware is empty array", async () => {
+    let rowan: any = new Rowan<Context>();
+
+    expect(rowan._middleware).to.not.be.undefined;
+
+  });
+
+  it("when constructor with param is called then middleware is reference-equal to given initialiser", async () => {
+    let expected = [(ctx) => false];
+    let rowan: any = new Rowan<Context>(expected);
+    expect(rowan._middleware).to.equal(expected);
+  });
+});
+
 describe("Basic Middleware", () => {
   it("when there is a single middleware, should it should be called", async () => {
     let rowan = new Rowan<Context>();

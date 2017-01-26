@@ -13,7 +13,7 @@ export interface IRowan<TCtx> extends IProcessor<TCtx> {
 }
 
 export class Rowan<TCtx> implements IRowan<TCtx> {
-  private _middleware: Handler<TCtx>[] = [];
+  constructor(private _middleware:  Handler<TCtx>[] = []){}
   process(ctx: TCtx): Promise<TaskResult>
   process(ctx: TCtx, err: BaseError | undefined): Promise<TaskResult>
   process(ctx: TCtx, err?: BaseError | undefined): Promise<TaskResult> {
