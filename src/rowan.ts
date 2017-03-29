@@ -17,7 +17,7 @@ export class Rowan<TCtx> implements IRowan<TCtx> {
   process(ctx: TCtx): Promise<TaskResult>
   process(ctx: TCtx, err: BaseError | undefined): Promise<TaskResult>
   process(ctx: TCtx, err?: BaseError | undefined): Promise<TaskResult> {
-    return Rowan.execute(ctx, err, this._middleware);
+    return Rowan.execute(ctx, err, this._middleware, true);
   }
   use(handler: Handler<TCtx>, ...handlers: Handler<TCtx>[]): this {
     if (isProcessor<TCtx>(handler) || handlers.length == 0) {
@@ -26,17 +26,17 @@ export class Rowan<TCtx> implements IRowan<TCtx> {
     else {
       if (isErrorHandler<TCtx>(handler)) {
         this._middleware.push(function (ctx, err) {
-          return Rowan.execute(ctx, err, [handler, ...handlers]);
+          return Rowan.execute(ctx, err, [handler, ...handlers], false);
         });
       } else {
         this._middleware.push(function (ctx) {
-          return Rowan.execute(ctx, undefined, [handler, ...handlers]);
+          return Rowan.execute(ctx, undefined, [handler, ...handlers], false);
         });
       }
     }
     return this;
   }
-  static async execute<Ctx>(ctx: Ctx, err: BaseError | undefined, handlers: Handler<Ctx>[]): Promise<TaskResult> {
+  static async execute<Ctx>(ctx: Ctx, err: BaseError | undefined, handlers: Handler<Ctx>[], terminate: boolean = false): Promise<TaskResult> {
     let result: TaskResult = err;
     for (let handler = handlers[0], i = 0; i < handlers.length; handler = handlers[++i]) {
       try {
@@ -55,7 +55,7 @@ export class Rowan<TCtx> implements IRowan<TCtx> {
       }
 
       if (result === false) {
-        return (i == handlers.length - 1) ? false : err;
+        return ((i == handlers.length - 1) || terminate) ? false : err;
       }
       else if (result === true) {
         result = true;

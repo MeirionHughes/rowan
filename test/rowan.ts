@@ -25,6 +25,20 @@ describe("General", () => {
     let rowan: any = new Rowan<Context>(expected);
     expect(rowan._middleware).to.equal(expected);
   });
+
+
+  it("Rowan.chain default is to not terminate all middleware if non-last returns false", async () => {    
+    let wasCalled: boolean;
+
+    let result = await Rowan.execute({}, undefined, [
+      (_) => { wasCalled = true; },
+      (_) => { return false; },
+      (_) => { assert.fail(); }
+    ]);
+
+    assert(wasCalled === true);
+  });
+   
 });
 
 describe("Basic Middleware", () => {
@@ -566,6 +580,21 @@ describe("Nested Chain Processors", () => {
     expect(called).to.deep.equal([true, true, true]);
   });
 
+  it("nested processor that returns false and not last should terminate parent", async () => {
+    let rowan = new Rowan<Context>();
+    let nested = new Rowan<Context>();
+
+    nested.use((ctx) => { });
+    nested.use((ctx) => { return false; });
+    nested.use((ctx) => { assert.fail(); });
+
+    rowan.use((ctx) => { });
+    rowan.use(nested);
+    rowan.use((ctx) => { assert.fail(); });
+
+    await rowan.process({});
+  });
+
   it("should use Processors when errors", async () => {
     let rowan = new Rowan<Context>();
     let nested = new Rowan<Context>();
@@ -589,7 +618,7 @@ describe("Nested Chain Processors", () => {
     });
 
     await rowan.process(Error("err"), {});
-    
+
     expect(called).to.deep.equal([true, true]);
   });
 
@@ -629,7 +658,7 @@ describe("Nested Chain Processors", () => {
     parent.use(() => { assert.fail(); });
 
     await parent.process({});
-    
+
     expect(called).to.deep.equal([]);
-  }); 
+  });
 });
