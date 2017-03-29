@@ -8,8 +8,9 @@ src
 spec
 test
 coverage
-tsconfig.json
+tsconfig*
 tsfmt.json
 tslint.json
 example.js
 gulpfile.js
+

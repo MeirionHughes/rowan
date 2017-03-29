@@ -1,4 +1,4 @@
-const Rowan = require('./lib/rowan').Rowan;
+import { Rowan } from './src/rowan';
 
 const main = async function () {
   // create a (derived) app
@@ -56,7 +56,7 @@ const main = async function () {
   await app.process({ foo: "bar" });
 };
 
-main().catch((err)=>{
+main().catch((err) => {
   console.log(err);
   process.exit(1);
 });

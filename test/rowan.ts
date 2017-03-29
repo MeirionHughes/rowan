@@ -55,7 +55,7 @@ describe("Basic Middleware", () => {
 
     await rowan.process({});
 
-    expect(called).to.deep.equal([true, true]);
+    expect(called).to.deep.eq([true, true]);
 
   });
 
@@ -77,9 +77,7 @@ describe("Basic Middleware", () => {
 
     await rowan.process({});
 
-    try {
-      expect(called).to.deep.equal([true, true]);
-    } catch (err) { assert.fail(err); }
+    expect(called).to.deep.eq([true, true]);
   });
 
   it("when there is an error, then error middleware should be called", async () => {
@@ -95,12 +93,17 @@ describe("Basic Middleware", () => {
       called[1] = true;
     });
 
-    await rowan.process({});
+    let rethrown = false;
 
     try {
-      expect(called).to.deep.equal([true, true]);
-    } catch (err) { assert.fail(err); }
+      await rowan.process({});
+    } catch (err) {
+      rethrown = true;
+    }
 
+    expect(rethrown).to.be.true;
+
+    expect(called).to.deep.eq([true, true]);
   });
 
   it("when error middleware returns true, clear error", async () => {
@@ -127,10 +130,7 @@ describe("Basic Middleware", () => {
 
     await rowan.process({});
 
-    try {
-      expect(called).to.deep.equal([true, true, true]);
-    } catch (err) { assert.fail(err); }
-
+    expect(called).to.deep.eq([true, true, true]);
   });
 
   it("when handler returns false, then termiate processing", async () => {
@@ -148,10 +148,7 @@ describe("Basic Middleware", () => {
 
     await rowan.process({});
 
-    try {
-      expect(called).to.deep.equal([true]);
-    } catch (err) { assert.fail(err); }
-
+    expect(called).to.deep.equal([true]);
   });
 });
 
@@ -170,10 +167,7 @@ describe("Chained Middleware", () => {
 
     await rowan.process({});
 
-    try {
-      expect(called).to.deep.equal([true, true]);
-    } catch (err) { assert.fail(err); }
-
+    expect(called).to.deep.equal([true, true]);
   });
 
   it("when no error, error handlers should not be called", async () => {
@@ -213,6 +207,7 @@ describe("Chained Middleware", () => {
       },
       async (ctx, err) => {
         called[1] = true;
+        return true;
       });
 
     await rowan.process({});
@@ -243,6 +238,7 @@ describe("Chained Middleware", () => {
     rowan.use(
       async (ctx, err) => {
         called[2] = true;
+        return true;
       });
 
     await rowan.process({});
@@ -317,6 +313,7 @@ describe("Error Middleware", () => {
     rowan.use(async (ctx, err) => {
       called[0] = true;
       expect(err instanceof Error).to.be.true;
+      return true;
     });
 
     await rowan.process({});
@@ -341,6 +338,7 @@ describe("Error Middleware", () => {
 
     rowan.use((_, err) => {
       called[0] = true;
+      return true;
     });
 
     await rowan.process({});
@@ -364,6 +362,7 @@ describe("Error Middleware", () => {
 
     rowan.use((_, err) => {
       called[0] = true;
+      return true;
     });
 
     await rowan.process(Error(), {});
@@ -385,13 +384,14 @@ describe("Error Middleware", () => {
     rowan.use(async (ctx, err) => {
       called[0] = true;
       expect(err instanceof Error).to.be.true;
+      return true;
     });
 
     await rowan.process({});
 
-    try {
-      expect(called).to.deep.equal([true]);
-    } catch (err) { assert.fail(err); }
+
+    expect(called).to.deep.equal([true]);
+
 
   });
 
@@ -400,24 +400,21 @@ describe("Error Middleware", () => {
     var called = [false, false];
 
     rowan.use(async (ctx) => {
-      return "foo";
+      return Error("foo");
     });
 
-    rowan.use(async (ctx, err) => {
-      called[0] = true;
-      expect(err).to.be("foo");
-    },
+    rowan.use(
+      async (ctx, err) => {
+        called[0] = true;
+      },
       async (ctx, err) => {
         called[1] = true;
-        expect(err).to.be("foo");
+        return true;
       });
 
     await rowan.process({});
 
-    try {
-      expect(called).to.deep.equal([true, true]);
-    } catch (err) { assert.fail(err); }
-
+    expect(called).to.deep.eq([true, true]);
   });
 
   it("should support using a derived Error class", async () => {
@@ -430,6 +427,7 @@ describe("Error Middleware", () => {
 
     rowan.use(async (ctx, err) => {
       called[0] = true;
+      return true;
     });
 
     await rowan.process({});
@@ -460,10 +458,7 @@ describe("Synchronous Middleware", () => {
 
     await rowan.process({});
 
-    try {
-      expect(called).to.deep.equal([true, true]);
-    } catch (err) { assert.fail(err); }
-
+    expect(called).to.deep.equal([true, true]);
   });
 
   it("should support returning Error", async () => {
@@ -476,6 +471,7 @@ describe("Synchronous Middleware", () => {
 
     rowan.use((ctx, err) => {
       called[0] = true;
+      return true;
     });
 
     await rowan.process({});
@@ -567,10 +563,7 @@ describe("Nested Chain Processors", () => {
 
     await rowan.process({});
 
-    try {
-      expect(called).to.deep.equal([true, true, true]);
-    } catch (err) { assert.fail(err); }
-
+    expect(called).to.deep.equal([true, true, true]);
   });
 
   it("should use Processors when errors", async () => {
@@ -592,17 +585,15 @@ describe("Nested Chain Processors", () => {
     rowan.use((ctx, err) => {
       called[1] = true;
       expect(err instanceof Error).to.be.true;
+      return true;
     });
 
     await rowan.process(Error("err"), {});
-
-    try {
-      expect(called).to.deep.equal([true, true]);
-    } catch (err) { assert.fail(err); }
-
+    
+    expect(called).to.deep.equal([true, true]);
   });
 
-  it("should terminating within a processor terminates parent", async () => {
+  it("terminating within a processor terminates parent", async () => {
     let rowan = new Rowan<Context>();
     let nested = new Rowan<Context>();
     var called = [];
@@ -619,11 +610,26 @@ describe("Nested Chain Processors", () => {
       }
     });
 
-    await rowan.process({});
+    let result = await rowan.process({});
+    if (typeof result !== "boolean" && result !== undefined) throw result;
 
     try {
       expect(called).to.deep.equal([]);
     } catch (err) { assert.fail(err); }
 
   });
+
+  it("terminating within a nested Rowan terminates parent", async () => {
+    let parent = new Rowan<Context>();
+    let child = new Rowan<Context>();
+    var called = [];
+
+    child.use(() => { return false; });
+    parent.use(child);
+    parent.use(() => { assert.fail(); });
+
+    await parent.process({});
+    
+    expect(called).to.deep.equal([]);
+  }); 
 });

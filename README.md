@@ -85,11 +85,10 @@ npm install
 npm test
 ```
 
-there is an es2017 example in the repo that you can run with: 
+there is an `example.ts` that you can run with ts-node
 
 ```
-gulp compile:source:es2017
-node --harmony-async-await example
+ts-node example
 ```
 
 ## Credits

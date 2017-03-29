@@ -13,7 +13,7 @@ export interface IRowan<TCtx> extends IProcessor<TCtx> {
 }
 
 export class Rowan<TCtx> implements IRowan<TCtx> {
-  constructor(private _middleware:  Handler<TCtx>[] = []){}
+  constructor(private _middleware: Handler<TCtx>[] = []) { }
   process(ctx: TCtx): Promise<TaskResult>
   process(ctx: TCtx, err: BaseError | undefined): Promise<TaskResult>
   process(ctx: TCtx, err?: BaseError | undefined): Promise<TaskResult> {
@@ -42,29 +42,34 @@ export class Rowan<TCtx> implements IRowan<TCtx> {
       try {
         if (isProcessor(handler)) {
           result = await handler.process(ctx, err);
-        } else if (isErrorHandler<Ctx>(handler)) {
+        }
+        else if (isErrorHandler<Ctx>(handler)) {
           if (err != undefined) {
             result = await (<ErrorHandler<Ctx>>handler)(ctx, err);
           }
         } else if (err == undefined) {
           result = await handler(ctx);
         }
-        if (typeof (result) == "boolean") {
-          if (result === false) {
-            return (i == handlers.length - 1) ? false : err;
-          }
-          else {
-            err = undefined;
-            result = undefined;
-          }
-        } else if (result != undefined) {
-          err = result;
-        }
-      } catch (exception) {
-        err = exception;
+      } catch (ex) {
+        result = ex;
+      }
+
+      if (result === false) {
+        return (i == handlers.length - 1) ? false : err;
+      }
+      else if (result === true) {
+        result = true;
+        err = undefined;
+      }
+      else if (result != undefined) {
+        err = result;
       }
     }
-    return result || err;
+
+    if (err)
+      throw err;
+
+    return result;
   }
 }
 
