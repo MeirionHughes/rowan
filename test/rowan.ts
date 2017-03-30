@@ -6,6 +6,7 @@ interface Context {
   req?: { path?: string };
   res?: { status?: number };
   params?: { [x: string]: any };
+  _done?: boolean;
 };
 
 class DerivedError extends Error {
@@ -26,8 +27,7 @@ describe("General", () => {
     expect(rowan._middleware).to.equal(expected);
   });
 
-
-  it("Rowan.chain default is to not terminate all middleware if non-last returns false", async () => {    
+  it("Rowan.chain default is to not terminate all middleware if non-last returns false", async () => {
     let wasCalled: boolean;
 
     let result = await Rowan.execute({}, undefined, [
@@ -38,7 +38,36 @@ describe("General", () => {
 
     assert(wasCalled === true);
   });
-   
+
+  it("setting _done on ctx terminates processing", async () => {
+    let wasCalled: boolean;
+
+    let result = await Rowan.execute({}, undefined, [
+      (_) => { wasCalled = true; },
+      (ctx) => { ctx._done = true; },
+      (_) => { assert.fail(); }
+    ]);
+
+    assert(wasCalled === true);
+  });
+
+  it("setting _done on ctx terminates processing of parent", async () => {
+    let wasCalled: boolean;
+    let rowan = new Rowan<Context>();
+    let child = new Rowan<Context>();
+
+    rowan.use((_) => { });
+    rowan.use(child);
+    rowan.use((_) => { assert.fail(); });
+    child.use((_) => { wasCalled = true; });
+
+    child.use((ctx) => { ctx._done = true; });
+    child.use((_) => { assert.fail(); });
+
+    await rowan.process({});
+
+    assert(wasCalled === true);
+  });
 });
 
 describe("Basic Middleware", () => {

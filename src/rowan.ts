@@ -1,18 +1,19 @@
 export type BaseError = any;
+export type BaseContext = any;
 export type TaskResult = BaseError | boolean | void;
-export type TaskHandler<TCtx> = (ctx: TCtx) => Promise<TaskResult> | TaskResult;
-export type ErrorHandler<TCtx> = (ctx: TCtx, err: BaseError) => Promise<TaskResult> | TaskResult;
-export type Handler<TCtx> = TaskHandler<TCtx> | ErrorHandler<TCtx> | IProcessor<TCtx>;
+export type TaskHandler<TCtx extends BaseContext> = (ctx: TCtx) => Promise<TaskResult> | TaskResult;
+export type ErrorHandler<TCtx extends BaseContext> = (ctx: TCtx, err: BaseError) => Promise<TaskResult> | TaskResult;
+export type Handler<TCtx extends BaseContext> = TaskHandler<TCtx> | ErrorHandler<TCtx> | IProcessor<TCtx>;
 
-export interface IProcessor<TCtx> {
+export interface IProcessor<TCtx extends BaseContext> {
   process(ctx: TCtx, err: BaseError | undefined): Promise<TaskResult> | TaskResult;
 }
 
-export interface IRowan<TCtx> extends IProcessor<TCtx> {
+export interface IRowan<TCtx extends BaseContext> extends IProcessor<TCtx> {
   use(handler: Handler<TCtx>, ...handlers: Handler<TCtx>[]): this;
 }
 
-export class Rowan<TCtx> implements IRowan<TCtx> {
+export class Rowan<TCtx extends BaseContext> implements IRowan<TCtx> {
   constructor(private _middleware: Handler<TCtx>[] = []) { }
   process(ctx: TCtx): Promise<TaskResult>
   process(ctx: TCtx, err: BaseError | undefined): Promise<TaskResult>
@@ -36,9 +37,12 @@ export class Rowan<TCtx> implements IRowan<TCtx> {
     }
     return this;
   }
-  static async execute<Ctx>(ctx: Ctx, err: BaseError | undefined, handlers: Handler<Ctx>[], terminate: boolean = false): Promise<TaskResult> {
+  static async execute<Ctx extends BaseContext>(ctx: Ctx, err: BaseError | undefined, handlers: Handler<Ctx>[], terminate: boolean = false): Promise<TaskResult> {
     let result: TaskResult = err;
     for (let handler = handlers[0], i = 0; i < handlers.length; handler = handlers[++i]) {
+      if (ctx._done === true) {
+        break;        
+      }
       try {
         if (isProcessor(handler)) {
           result = await handler.process(ctx, err);

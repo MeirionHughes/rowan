@@ -59,7 +59,7 @@ const main = async function () {
       else
         console.log("handle ctx");
 
-      //Run a chain manually and return its result
+      //Run a chain manually and return its result (false)
       return await Rowan.execute(ctx, err, [
         (_) => { console.log("moo");},
         (_) => false // kill execution through stack
