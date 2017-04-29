@@ -1,6 +1,6 @@
 {
   "name": "rowan",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A lightweight asynchronous task-middleware library",
   "main": "dist/commonjs/rowan.js",
   "typings": "dist/commonjs/rowan.d.ts",
