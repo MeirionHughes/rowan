@@ -82,5 +82,5 @@ function isErrorHandler<TCtx>(handler: Handler<TCtx>): handler is ErrorHandler<T
 }
 
 function isProcessor<TCtx>(handler: Handler<TCtx> | IProcessor<TCtx>): handler is IProcessor<TCtx> {
-  return typeof (handler) == "object" && typeof (handler.process) == "function" && handler.process.length == 2;
+  return typeof (handler) == "object" && typeof (handler.process) == "function";
 }
