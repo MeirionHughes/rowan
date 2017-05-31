@@ -6,7 +6,7 @@ interface Context {
   req?: { path?: string };
   res?: { status?: number };
   params?: { [x: string]: any };
-  _done?: boolean;
+  $done?: boolean;
 };
 
 class DerivedError extends Error {
@@ -39,19 +39,19 @@ describe("General", () => {
     assert(wasCalled === true);
   });
 
-  it("setting _done on ctx terminates processing", async () => {
+  it("setting $done on ctx terminates processing", async () => {
     let wasCalled: boolean;
 
     let result = await Rowan.execute({}, undefined, [
       (_) => { wasCalled = true; },
-      (ctx) => { ctx._done = true; },
+      (ctx) => { ctx.$done = true; },
       (_) => { assert.fail(); }
     ]);
 
     assert(wasCalled === true);
   });
 
-  it("setting _done on ctx terminates processing of parent", async () => {
+  it("setting $done on ctx terminates processing of parent", async () => {
     let wasCalled: boolean;
     let rowan = new Rowan<Context>();
     let child = new Rowan<Context>();
@@ -61,7 +61,7 @@ describe("General", () => {
     rowan.use((_) => { assert.fail(); });
     child.use((_) => { wasCalled = true; });
 
-    child.use((ctx) => { ctx._done = true; });
+    child.use((ctx) => { ctx.$done = true; });
     child.use((_) => { assert.fail(); });
 
     await rowan.process({});
