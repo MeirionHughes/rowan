@@ -40,6 +40,9 @@ export class Rowan<TCtx extends BaseContext> implements IRowan<TCtx> {
   static async execute<Ctx extends BaseContext>(ctx: Ctx, err: BaseError | undefined, handlers: Handler<Ctx>[], terminate: boolean = false): Promise<TaskResult> {
     let result: TaskResult = err;
     for (let handler = handlers[0], i = 0; i < handlers.length; handler = handlers[++i]) {
+      if (ctx._done === true) {
+        break;        
+      }
       if (ctx.$done === true) {
         break;        
       }
