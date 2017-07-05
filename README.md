@@ -1,6 +1,6 @@
 # Rowan
 
-A lightweight async/await task-middleware library.  
+A lightweight async middleware library.  
 
 ![584023-200](https://cloud.githubusercontent.com/assets/3584509/21929203/1ffa1db6-d987-11e6-8e07-77a6131097af.png)
 
@@ -9,74 +9,40 @@ A lightweight async/await task-middleware library.
 [![Travis Status][travis-image]][travis-url]
 [![codecov](https://codecov.io/gh/MeirionHughes/rowan/branch/master/graph/badge.svg)](https://codecov.io/gh/MeirionHughes/rowan)
 
-## Install
-* `npm install rowan`
+[Documentation](https://github.com/MeirionHughes/rowan/wiki)
 
 ## Usage
+
+Rowan is a lightweight library that can be used to build middleware-style control-flow and error-handling. 
+
+Simply create  an instance of the Rowan class (or derivation) and call `use` with a middleware function
 
 ```ts
 const Rowan = require('rowan').Rowan;
 
-const main = async function () {
+// Create a (derived) app
+const app = new Rowan();
 
-  // create a (derived) app
-  const app = new Rowan();
+// Add middleware
+app.use(async (ctx) => {
+  console.log(`foo: ${ctx.foo}`);
+});
 
-  //add middleware
-  app.use(async (ctx) => {
-    console.log("Do something async...");
-    throw Error("throw errors");
-  });
-
-  //add error handlers
-  app.use((ctx, err) => {
-    console.log("handle errors...");
-    return true; // clear error - continue;           
-  });
-
-  const predicate = async function (ctx) {
-    console.log("do something async...");
-    await new Promise(r => setTimeout(r, 1000));
-
-    return "errors...";
-  }
-
-  // add chains and predicates
-  app.use(
-    predicate,
-    (ctx, err) => {
-      console.log("abort task chains...");
-      return false; // abort chain;
-    },
-    app.use((ctx) => { /* never called*/ })
-  );
-
-  // Nest applications / routes / processors
-  app.use({
-    process: async function (ctx, err) {
-      if (err != undefined)
-        console.log("handle error");
-      else
-        console.log("handle ctx");
-
-      //Run a chain manually and return its result (false)
-      return await Rowan.execute(ctx, err, [
-        (_) => { console.log("moo");},
-        (_) => false // kill execution through stack
-      ]);
-    }
-  });  
-  
-  app.use((_) => {   
-    // never called
-  });
-
-  // Use it 
-  await app.process({ foo: "bar" });
-}();
 ```
 
-check [Documentation](https://github.com/MeirionHughes/rowan/wiki) for more information; 
+Once the middleware is all setup you call `process` and pass along the context instance. 
+
+
+```ts
+// Use it 
+await app.process({ foo: "bar!" });
+```
+
+... which in this example would output to console: 
+
+>foo: bar!
+
+Check the [Documentation](https://github.com/MeirionHughes/rowan/wiki) for more information; 
 
 ## Build
 
