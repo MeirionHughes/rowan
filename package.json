@@ -1,6 +1,6 @@
 {
   "name": "rowan",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "A lightweight async middleware library",
   "main": "dist/commonjs/rowan.js",
   "typings": "dist/commonjs/rowan.d.ts",
@@ -53,8 +53,7 @@
     "tslint": "^4.3.1",
     "typescript": "^2.3.4"
   },
-  "dependencies": {   
-  },
+  "dependencies": {},
   "nyc": {
     "include": [
       "src/**/*.ts"
