@@ -4,7 +4,6 @@
 .nyc_output
 .npmignore
 .travis.yml
-src
 spec
 test
 coverage
