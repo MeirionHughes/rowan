@@ -6,7 +6,6 @@ interface Context {
   req?: { path?: string };
   res?: { status?: number };
   params?: { [x: string]: any };
-  $done?: boolean;
 };
 
 class DerivedError extends Error {
