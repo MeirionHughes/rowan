@@ -1,7 +1,7 @@
-import { Rowan } from '../src/rowan';
+import { Rowan, RowanContext } from '../src/rowan';
 import { assert, expect } from 'chai';
 
-interface Context {
+interface Context extends RowanContext  {
   auth?: boolean;
   req?: { path?: string };
   res?: { status?: number };
@@ -407,7 +407,7 @@ describe("Error Middleware", () => {
       return true;
     });
 
-    await rowan.process(Error(), {});
+    await rowan.process({}, Error());
 
     try {
       expect(called).to.deep.equal([true]);
@@ -645,7 +645,7 @@ describe("Nested Chain Processors", () => {
       return true;
     });
 
-    await rowan.process(Error("err"), {});
+    await rowan.process({}, Error("err"));
 
     expect(called).to.deep.equal([true, true]);
   });
