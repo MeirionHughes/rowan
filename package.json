@@ -2,8 +2,8 @@
   "name": "rowan",
   "version": "0.6.1",
   "description": "A lightweight async middleware library",
-  "main": "dist/commonjs/rowan.js",
-  "typings": "dist/commonjs/rowan.d.ts",
+  "main": "dist/es2017/rowan.js",
+  "typings": "dist/es2017/rowan.d.ts",
   "scripts": {
     "lint": "tslint --project tsconfig.json --config tslint.json",
     "clean": "rimraf .tmp .nyc_output coverage dist",
