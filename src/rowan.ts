@@ -17,19 +17,16 @@ export class Rowan<TCtx extends RowanContext> implements Processor<TCtx> {
     return Rowan.execute(ctx, err, this._middleware, true);
   }
   use(handler: Handler<TCtx>, ...handlers: Handler<TCtx>[]): this {
-    if (isProcessor<TCtx>(handler) || handlers.length == 0) {
+    if (handlers.length == 0) {
       this._middleware.push(handler);
     }
     else {
-      if (isErrorHandler<TCtx>(handler)) {
-        this._middleware.push(function (ctx, err) {
-          return Rowan.execute(ctx, err, [handler, ...handlers], false);
-        });
-      } else {
-        this._middleware.push(function (ctx) {
-          return Rowan.execute(ctx, undefined, [handler, ...handlers], false);
-        });
-      }
+      const _handlers = [handler, ...handlers];
+      this._middleware.push({        
+        process: function (ctx, err) {
+          return Rowan.execute(ctx, err, _handlers, false);
+        }
+      });
     }
     return this;
   }
