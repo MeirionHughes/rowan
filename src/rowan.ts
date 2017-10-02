@@ -1,19 +1,17 @@
-export type BaseError = any;
-export type RowanContext = { $done?: true };
-export type TaskResult = BaseError | boolean | void;
-export type TaskHandler<TCtx extends RowanContext> = (ctx: TCtx) => Promise<TaskResult> | TaskResult;
-export type ErrorHandler<TCtx extends RowanContext> = (ctx: TCtx, err: BaseError) => Promise<TaskResult> | TaskResult;
+export type RowanContext = { $done ?: true };
+export type TaskHandler<TCtx extends RowanContext> = (ctx: TCtx) => Promise<any> | any;
+export type ErrorHandler<TCtx extends RowanContext> = (ctx: TCtx, err: any) => Promise<any> | any;
 export type Handler<TCtx extends RowanContext> = TaskHandler<TCtx> | ErrorHandler<TCtx> | Processor<TCtx>;
 
 export interface Processor<TCtx extends RowanContext> {
-  process(ctx: TCtx, err: BaseError | undefined): Promise<TaskResult> | TaskResult;
+  process(ctx: TCtx, err: any): Promise<any> | any;
 }
 
 export class Rowan<TCtx extends RowanContext> implements Processor<TCtx> {
   constructor(private _middleware: Handler<TCtx>[] = []) { }
-  process(ctx: TCtx): Promise<TaskResult>
-  process(ctx: TCtx, err: BaseError | undefined): Promise<TaskResult>
-  process(ctx: TCtx, err?: BaseError | undefined): Promise<TaskResult> {
+  process(ctx: TCtx): Promise<any>
+  process(ctx: TCtx, err: any): Promise<any>
+  process(ctx: TCtx, err?: any): Promise<any> {
     return Rowan.execute(ctx, err, this._middleware, true);
   }
   use(handler: Handler<TCtx>, ...handlers: Handler<TCtx>[]): this {
@@ -22,7 +20,7 @@ export class Rowan<TCtx extends RowanContext> implements Processor<TCtx> {
     }
     else {
       const _handlers = [handler, ...handlers];
-      this._middleware.push({        
+      this._middleware.push({
         process: function (ctx, err) {
           return Rowan.execute(ctx, err, _handlers, false);
         }
@@ -30,8 +28,8 @@ export class Rowan<TCtx extends RowanContext> implements Processor<TCtx> {
     }
     return this;
   }
-  static async execute<Ctx extends RowanContext>(ctx: Ctx, err: BaseError | undefined, handlers: Handler<Ctx>[], terminate: boolean = false): Promise<TaskResult> {
-    let result: TaskResult = err;
+  static async execute<Ctx extends RowanContext>(ctx: Ctx, err: any, handlers: Handler<Ctx>[], terminate: boolean = false): Promise<any> {
+    let result: any = err;
     for (let handler = handlers[0], i = 0; i < handlers.length; handler = handlers[++i]) {
       if (ctx.$done === true) {
         break;
