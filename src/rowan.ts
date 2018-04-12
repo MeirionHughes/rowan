@@ -1,77 +1,64 @@
-export type RowanContext = { $done ?: true };
-export type TaskHandler<TCtx extends RowanContext> = (ctx: TCtx) => Promise<any> | any;
-export type ErrorHandler<TCtx extends RowanContext> = (ctx: TCtx, err: any) => Promise<any> | any;
-export type Handler<TCtx extends RowanContext> = TaskHandler<TCtx> | ErrorHandler<TCtx> | Processor<TCtx>;
-
-export interface Processor<TCtx extends RowanContext> {
-  process(ctx: TCtx, err: any): Promise<any> | any;
+export interface IMiddleware<TCtx, TMeta> {
+  readonly meta: TMeta;
+  process(ctx: TCtx, next: () => Promise<void>): Promise<void>;
 }
 
-export class Rowan<TCtx extends RowanContext> implements Processor<TCtx> {
-  constructor(private _middleware: Handler<TCtx>[] = []) { }
-  process(ctx: TCtx): Promise<any>
-  process(ctx: TCtx, err: any): Promise<any>
-  process(ctx: TCtx, err?: any): Promise<any> {
-    return Rowan.execute(ctx, err, this._middleware, true);
+export interface IProcessor<TCtx, TMeta> extends IMiddleware<TCtx, TMeta> {
+  readonly middleware: Iterable<IMiddleware<TCtx, TMeta>>;
+  use(middleware: IMiddleware<TCtx, TMeta>): this;
+  use(handler: (ctx: TCtx, next: () => Promise<void>) => (Promise<void>)): this;
+}
+
+export type Meta = {
+  [index: string]: any;
+};
+
+export class Processor<TCtx, TMeta = Meta> implements IProcessor<TCtx, TMeta>{
+  private _meta: TMeta;
+  private _middleware: IMiddleware<TCtx, TMeta>[] = [];
+  constructor() {
   }
-  use(handler: Handler<TCtx>, ...handlers: Handler<TCtx>[]): this {
-    if (handlers.length == 0) {
-      this._middleware.push(handler);
-    }
-    else {
-      const _handlers = [handler, ...handlers];
+  get meta() { return this._meta; }
+  get middleware() { return this._middleware; }
+
+  use(middleware: IMiddleware<TCtx, TMeta>): this;
+  use(handler: (ctx: TCtx, next: () => Promise<void>) => (Promise<void>)): this;
+  use(input: IMiddleware<TCtx, TMeta> | ((ctx: TCtx, next: () => Promise<void>) => (Promise<void>))): this {
+    if (typeof input === "function") {
       this._middleware.push({
-        process: function (ctx, err) {
-          return Rowan.execute(ctx, err, _handlers, false);
-        }
-      });
+        async process(ctx, next) {
+          return input(ctx, next);
+        },
+        meta: undefined
+      })
     }
     return this;
   }
-  static async execute<Ctx extends RowanContext>(ctx: Ctx, err: any, handlers: Handler<Ctx>[], terminate: boolean = false): Promise<any> {
-    let result: any = err;
-    for (let handler = handlers[0], i = 0; i < handlers.length; handler = handlers[++i]) {
-      if (ctx.$done === true) {
-        break;
-      }
-      try {
-        if (isProcessor(handler)) {
-          result = await handler.process(ctx, err);
-        }
-        else if (isErrorHandler<Ctx>(handler)) {
-          if (err != undefined) {
-            result = await (<ErrorHandler<Ctx>>handler)(ctx, err);
-          }
-        } else if (err == undefined) {
-          result = await handler(ctx);
-        }
-      } catch (ex) {
-        result = ex;
-      }
 
-      if (result === false) {
-        return ((i == handlers.length - 1) || terminate) ? false : err;
-      }
-      else if (result === true) {
-        result = true;
-        err = undefined;
-      }
-      else if (result != undefined) {
-        err = result;
-      }
+  async process(ctx: TCtx, next: () => Promise<void> = () => Promise.resolve()): Promise<void> {
+    let stack = this._middleware.slice().reverse();
+
+    for (let item of stack) {
+      next = () => { return item.process(ctx, next); };
     }
-
-    if (err)
-      throw err;
-
-    return result;
+    return await next();
   }
 }
 
-function isErrorHandler<TCtx>(handler: Handler<TCtx>): handler is ErrorHandler<TCtx> {
-  return typeof (handler) == "function" && handler.length == 2;
+let app = new Processor();
+
+app.use(async (ctx, next) => {
+  console.log("one");
+  await next();
+});
+
+app.use(async (ctx, next) => {
+  console.log("two");
+  await next();
+});
+
+async function main() {
+  await app.process({});
 }
 
-function isProcessor<TCtx>(handler: Handler<TCtx> | Processor<TCtx>): handler is Processor<TCtx> {
-  return typeof (handler) == "object" && typeof (handler.process) == "function";
-}
+main().catch(console.log);
