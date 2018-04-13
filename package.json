@@ -1,6 +1,6 @@
 {
   "name": "rowan",
-  "version": "0.8.0",
+  "version": "1.0.0",
   "description": "A lightweight async middleware library",
   "main": "dist/commonjs/rowan.js",
   "typings": "dist/commonjs/rowan.d.ts",
@@ -12,7 +12,7 @@
     "build:es2015": "tsc --project tsconfig.build.json --rootDir src/ --outDir ./dist/es2015 --module es2015",
     "build:commonjs": "tsc --project tsconfig.build.json --rootDir src/ --outDir ./dist/commonjs --module commonjs --target es2017",
     "debug": "yarn run clean && tsc --project tsconfig.json --outDir ./.tmp/ --module commonjs ",
-    "test": "nyc node_modules/mocha/bin/_mocha --require source-map-support/register --compilers ts:ts-node/register test/*.ts",
+    "test": "nyc node_modules/mocha/bin/_mocha  test/*.ts",
     "cover": "codecov",
     "prepublishOnly": "yarn run test && yarn run build"
   },
@@ -68,6 +68,8 @@
       ".tsx"
     ],
     "require": [
+      "ts-node/register",
+      "source-map-support/register",
       "ts-node/register"
     ],
     "reporter": [
