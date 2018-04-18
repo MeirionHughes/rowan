@@ -1,22 +1,13 @@
 import { Rowan, RowanContext } from '../src/rowan';
 import { assert, expect } from 'chai';
 
-interface Context extends RowanContext  {
-  auth?: boolean;
-  req?: { path?: string };
-  res?: { status?: number };
-  params?: { [x: string]: any };
+type Context = {
+  value: boolean;
 };
-
-class DerivedError extends Error {
-  status: number = 404;
-}
 
 describe("General", () => {
   it("when constructor without param is called then middleware is an empty array", async () => {
-    let rowan: any = new Rowan<Context>();
-
+    let rowan: any = new Rowan();
     expect(rowan._middleware).to.not.be.undefined;
   });
 });
-

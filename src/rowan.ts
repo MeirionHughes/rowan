@@ -1,12 +1,12 @@
 export type IHandler<TCtx> = (ctx: TCtx, next: () => Promise<void>) => Promise<void>;
 export type IAutoNextHandler<TCtx> = (ctx: TCtx) => Promise<void> | void;
 
-export interface IMiddleware<TCtx, TMeta> {
+export interface IMiddleware<TCtx, TMeta, TCtxOut = TCtx> {
   readonly meta?: TMeta;
-  process(ctx: TCtx, next: () => Promise<void>): Promise<void>;
+  process(ctx: TCtx, next: (ctx: TCtxOut) => Promise<void>): Promise<void>;
 }
 
-export interface IProcessor<TCtx, TMeta> extends IMiddleware<TCtx, TMeta> {
+export interface IProcessor<TCtx, TMeta, TCtxIn = TCtx> extends IMiddleware<TCtxIn, TMeta> {
   readonly middleware: Iterable<IMiddleware<TCtx, TMeta>>;
   use(middleware: IMiddleware<TCtx, TMeta>): this;
   use(handler: (ctx: TCtx, next: () => Promise<void>) => (Promise<void>)): this;
@@ -28,7 +28,7 @@ export function isAutoHandler(obj): obj is IAutoNextHandler<any> {
   return typeof (obj) === "function" && obj.length <= 1;
 }
 
-export class Rowan<TCtx = RowanContext, TMeta = RowanMeta> implements IProcessor<TCtx, TMeta>{
+export class Rowan<TCtx = RowanContext, TMeta = RowanMeta, TCtxIn = TCtx> implements IProcessor<TCtx, TMeta, TCtxIn>{
   private _meta: TMeta;
   private _middleware: IMiddleware<TCtx, TMeta>[];
   private _stackCache;
@@ -52,16 +52,18 @@ export class Rowan<TCtx = RowanContext, TMeta = RowanMeta> implements IProcessor
     } else {
       return {
         meta: meta || input["meta"],
-        process: isAutoHandler(input) ? async function (ctx, next) { await input(ctx); await next(); } : input
+        process: isAutoHandler(input) ? async function (ctx, next) { await input(ctx); await next(ctx); } : input
       } as IMiddleware<TCtx, TMeta>;
     }
   }
 
-  async process(ctx: TCtx, next: () => Promise<void> = () => Promise.resolve()): Promise<void> {
+  async process(ctx: TCtx, next?: () => Promise<void>): Promise<void>
+  async process(ctx: TCtxIn, next?: () => Promise<void>): Promise<void>
+  async process(ctx: TCtx | TCtxIn, next: () => Promise<void> = () => Promise.resolve()): Promise<void> {
     const stack = this._middleware.slice().reverse();
     for (let item of stack) {
       const _next = next; //move into closure scope
-      next = function () { return item.process(ctx, _next); };
+      next = function () { return item.process(ctx as TCtx, _next); };
     }
     return await next();
   }

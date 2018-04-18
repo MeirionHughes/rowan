@@ -66,3 +66,6 @@ ts-node example
 [travis-url]: https://travis-ci.org/MeirionHughes/rowan
 [travis-image]: https://img.shields.io/travis/MeirionHughes/rowan/master.svg
 
+I'm calling it: Q is escrow
+
+There is plenty of resources out there describing the history of IOTA and the work on trinary processors - the fact the tangle transactions pass trinary payloads  means they're still going the route of having dedicated trinary processors to run "something". 
