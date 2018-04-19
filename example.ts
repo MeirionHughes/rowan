@@ -1,27 +1,29 @@
-type Meta = { [index: string]: any };
-type Next<Ctx> = (ctx?: Ctx) => Promise<void>;
-type Handler<Ctx, CtxOut> = (ctx: Ctx, next: Next<CtxOut>) => void;
-type Middleware<Ctx, CtxOut, TMeta = Meta> = {
-  meta?: TMeta;
-  process(ctx: Ctx, next: Next<CtxOut>): void;
-}
+import {Rowan, Next} from './src/rowan';
 
-interface IRowan<CtxStart, Ctx=CtxStart, TMeta = Meta> extends Middleware<CtxStart, Ctx, TMeta> {
-  use<CtxOut=Ctx>(m: Middleware<Ctx, CtxOut, TMeta>): IRowan<CtxStart, CtxOut, TMeta>;
-  use<CtxOut=Ctx>(h: Handler<Ctx, CtxOut>, meta?: TMeta): IRowan<CtxStart, CtxOut, TMeta>;
-}
+let delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-let app: IRowan<{ name: string }>;
-let sub: IRowan<{ name: string }>;
-
-app
-  .use(sub)
-  .use((ctx) => {
+let app = new Rowan<{ name: string }>()
+  .use(async (ctx) => {
+    console.log("one");
   })
   .use(async (ctx, next) => {
+
+    ctx.name = "John Doe";
     await next();
+    console.log("three");
   })
   .use({
-    process(ctx, next) {
-    }
+    async process(ctx, next: Next<{ age: number }>) {
+      console.log("two");
+      await next({ age: 20 });
+    },
   });
+
+async function main() {
+  let input = { name: "John" };
+  let result = await app.execute(input);
+  console.log(input);
+  console.log(result);
+}
+
+main().catch(console.log);
