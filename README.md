@@ -13,9 +13,9 @@ A lightweight async middleware library.
 
 ## Usage
 
-Rowan is a lightweight library that can be used to build middleware-style control-flow and error-handling. 
+Rowan is a lightweight library that can be used to build asynchronous middleware-style control-flow and error-handling, with particular focus on providing a rich typescript experience. 
 
-Simply create  an instance of the Rowan class (or derivation) and call `use` with a middleware function
+Simply create an instance of the Rowan class (or derivation) and call `use` with a middleware function
 
 ```ts
 const Rowan = require('rowan').Rowan;
@@ -23,7 +23,7 @@ const Rowan = require('rowan').Rowan;
 // Create a (derived) app
 const app = new Rowan();
 
-// Add middleware
+// Add middleware and handlers
 app.use(async (ctx) => {
   console.log(`foo: ${ctx.foo}`);
 });
@@ -35,14 +35,14 @@ Once the middleware is all setup you call `process` and pass along the context i
 
 ```ts
 // Use it 
-await app.process({ foo: "bar!" });
+await app.execute({ foo: "bar!" });
 ```
 
 ... which in this example would output to console: 
 
 >foo: bar!
 
-Check the [Documentation](https://github.com/MeirionHughes/rowan/wiki) for more information; 
+Check the [Documentation](https://github.com/MeirionHughes/rowan/wiki) for more information;
 
 ## Build
 
