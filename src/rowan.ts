@@ -1,9 +1,9 @@
-export type Next<Ctx> = (ctx?: Ctx) => Promise<void>;
-export type Handler<Ctx, CtxOut> = (ctx: Ctx, next: Next<CtxOut>) => Promise<void> | void;
-export type AutoHandler<Ctx> = (ctx: Ctx) => Promise<void> | void;
+export type Next<Ctx> = (ctx?: Ctx) => Promise<Ctx | void>;
+export type Handler<Ctx, CtxOut> = (ctx: Ctx, next: Next<CtxOut>) => Promise<Ctx | void> | Ctx | void;
+export type AutoHandler<Ctx> = (ctx: Ctx) => Promise<Ctx | void> | Ctx | void;
 export type Middleware<Ctx, CtxOut, TMeta = any> = {
   meta?: TMeta;
-  process(ctx: Ctx, next: Next<CtxOut>): Promise<void>;
+  process(ctx: Ctx, next: Next<CtxOut>): Promise<Ctx | void>;
 }
 
 export interface IRowan<CtxStart, CtxEnd=CtxStart, TMeta = any> extends Middleware<CtxStart, CtxEnd, TMeta> {
@@ -16,14 +16,6 @@ export interface IRowan<CtxStart, CtxEnd=CtxStart, TMeta = any> extends Middlewa
 export type RowanMeta = { [index: string]: any };
 export type RowanContext = { [index: string]: any };
 
-export function isMiddleware(obj): obj is Middleware<any, any> {
-  return typeof (obj) === "object" && typeof (obj["process"]) === "function";
-}
-
-export function isAutoHandler(obj): obj is AutoHandler<any> {
-  return typeof (obj) === "function" && obj.length <= 1;
-}
-
 export class Rowan<CtxStart=RowanContext, CtxEnd=CtxStart, Meta=RowanMeta> implements IRowan<CtxStart, CtxEnd, Meta>{
   private _meta: Meta;
   protected _middleware: Middleware<any, any, Meta>[] = [];
@@ -34,7 +26,7 @@ export class Rowan<CtxStart=RowanContext, CtxEnd=CtxStart, Meta=RowanMeta> imple
   use<CtxOut = CtxEnd>(m: Middleware<CtxEnd, CtxOut, Meta>): IRowan<CtxStart, CtxOut, Meta>;
   use<CtxOut = CtxEnd>(h: Handler<CtxEnd, CtxOut>, meta?: Meta): IRowan<CtxStart, CtxOut, Meta>;
   use<CtxOut = CtxEnd>(input: any, meta?: any) {
-    this._middleware.push(this._convert(input));
+    this._middleware.push(Rowan.convertToMiddleware(input));
     return this as any as IRowan<CtxStart, CtxOut, Meta>;
   }
 
@@ -47,9 +39,22 @@ export class Rowan<CtxStart=RowanContext, CtxEnd=CtxStart, Meta=RowanMeta> imple
     })
   }
 
-  process<CtxOut = CtxStart>(ctx: CtxStart, next?: (ctx?) => Promise<void>): Promise<void>
-  process<CtxOut = CtxStart>(ctx: CtxStart, next: (ctx?) => Promise<void> = () => Promise.resolve()): Promise<void> {
-    const stack = this._middleware.slice().reverse();
+  process<CtxOut = CtxStart>(ctx: CtxStart, next?: Next<any>): Promise<CtxOut | void>
+  process<CtxOut = CtxStart>(ctx: CtxStart, next: Next<any> = () => Promise.resolve()): Promise<CtxOut | void> {
+    return Rowan.process(this.middleware, ctx, next);
+  }
+
+  static async execute(middleware: Middleware<any, any>[], ctx: any): Promise<any> {
+    let resolve, reject;
+    return new Promise<any>(async (r, x) => {
+      try {
+        await Rowan.process(middleware, ctx, async (_ctx?) => { r(_ctx || ctx); });
+      } catch (e) { x(e); }
+    })
+  }
+
+  static process(middleware: Middleware<any, any>[], ctx: any, next: (ctx?) => Promise<void> = (x) => Promise.resolve(x || ctx)): Promise<void> {
+    const stack = middleware.slice().reverse();
     var _ctx: any = ctx; //shared scope;
     for (let item of stack) {
       const _next = next; //move into closure scope
@@ -58,14 +63,22 @@ export class Rowan<CtxStart=RowanContext, CtxEnd=CtxStart, Meta=RowanMeta> imple
     return next(_ctx);
   }
 
-  private _convert(input: Middleware<any, any, Meta> | Handler<any, any>, meta?: Meta) {
+  static convertToMiddleware(input: Middleware<any, any> | Handler<any, any> | AutoHandler<any>, meta?: any) {
     if (isMiddleware(input)) {
       return input;
     } else {
       return {
         meta: meta || input["meta"],
-        process: isAutoHandler(input) ? async function (ctx, next) { await input(ctx); await next(ctx); } : input
-      } as Middleware<any, any, Meta>;
+        process: isAutoHandler(input) ? async function (ctx, next) { await input(ctx); return await next(ctx); } : input
+      } as Middleware<any, any, any>;
     }
   }
+}
+
+export function isMiddleware(obj): obj is Middleware<any, any> {
+  return typeof (obj) === "object" && typeof (obj["process"]) === "function";
+}
+
+export function isAutoHandler(obj): obj is AutoHandler<any> {
+  return typeof (obj) === "function" && obj.length <= 1;
 }
