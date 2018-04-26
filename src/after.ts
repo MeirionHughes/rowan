@@ -1,12 +1,11 @@
-import { Rowan, Next, Middleware, RowanMeta, RowanContext } from "./rowan";
+import { Rowan, Next, Processor } from "./rowan";
 
 /** 
- * executes given middleware after next has returned. 
+ * executes its middleware after next has returned. 
  */
-export class After<Ctx = any, Meta = any> implements Middleware<Ctx, Ctx, Meta>{
-  constructor(private _middleware: Middleware<Ctx, Ctx, Meta>) {}
-  async process(ctx: Ctx, next: Next<Ctx>) {
-    ctx = await next() || ctx;
-    return this._middleware.process(ctx, () => Promise.resolve());
+export class After<Ctx = any> extends Rowan<Ctx>{
+  async process(ctx: Ctx, next: Next) {
+    await next();
+    await super.process(ctx, () => Promise.resolve());
   }
 }
