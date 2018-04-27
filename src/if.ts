@@ -3,8 +3,8 @@ import { Rowan, Next, Meta, Processor } from "./rowan";
 /**
  * guards execution of a middleware chain with a predicate
  * if the predicate returns false for a given context, then its middleware is skipped entirely 
- * and next is called. 
- * if the predicate returns true, then the middleware 
+ * and the given next is called. 
+ * if the predicate returns true, then the middleware is executed, with the given next added to the end. 
  */
 export class If<Ctx = any> extends Rowan<Ctx>{
   private terminate: boolean;
