@@ -12,9 +12,9 @@ export class If<Ctx = any> extends Rowan<Ctx>{
   constructor(predicate: (ctx: Ctx) => Promise<boolean> | boolean, middleware?: Processor<Ctx>[])
   constructor(predicate: (ctx: Ctx) => Promise<boolean> | boolean, terminate?: boolean)
   constructor(predicate: (ctx: Ctx) => Promise<boolean> | boolean, middleware: Processor<Ctx>[], terminate?: boolean)
-  constructor(private predicate: (ctx: Ctx) => Promise<boolean> | boolean, arg1: Processor<Ctx>[] | boolean, terminate?: boolean) {
-    super(Array.isArray(arg1) ? arg1 : []);
-    this.terminate = !Array.isArray(arg1) ? arg1 : (terminate || false)
+  constructor(private predicate: (ctx: Ctx) => Promise<boolean> | boolean, arg: Processor<Ctx>[] | boolean, terminate?: boolean) {
+    super(Array.isArray(arg) ? arg : []);
+    this.terminate = !Array.isArray(arg) ? arg : (terminate || false)
   }
   async process(ctx: Ctx, next: Next): Promise<void> {
     if (await this.predicate(ctx)) {

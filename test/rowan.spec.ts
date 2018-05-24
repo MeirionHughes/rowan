@@ -1,4 +1,4 @@
-import { Rowan, RowanContext } from '../src/rowan';
+import { Rowan } from '../src/rowan';
 import { assert, expect } from 'chai';
 
 type Context = {
