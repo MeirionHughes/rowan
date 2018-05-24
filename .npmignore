@@ -6,10 +6,13 @@
 .travis.yml
 spec
 test
+src
 coverage
 tsconfig*
 tsfmt.json
 tslint.json
 example.js
 gulpfile.js
+yarn.lock
+example.ts
 
