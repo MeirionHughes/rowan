@@ -13,12 +13,12 @@ A lightweight async middleware library.
 
 ## Usage
 
-Rowan is a lightweight library that can be used to build asynchronous middleware-style control-flow and error-handling, with particular focus on providing a rich typescript experience. 
+Rowan can be used to build asynchronous middleware-style control-flow and error-handling, with particular focus on providing a rich typescript experience. 
 
-Simply create an instance of the Rowan class (or derivation) and call `use` with a middleware function
+Create an instance of the Rowan class (or derivation) and call `use` with a middleware function
 
 ```ts
-const Rowan = require('rowan').Rowan;
+import {Rowan} from 'rowan';
 
 // Create a (derived) app
 const app = new Rowan();
@@ -30,7 +30,7 @@ app.use(async (ctx) => {
 
 ```
 
-Once the middleware is all setup you call `process` and pass along the context instance. 
+Once the middleware is all setup you call `process` and pass along the context. 
 
 
 ```ts
@@ -65,7 +65,3 @@ ts-node example
 [npm-downloads]: https://img.shields.io/npm/dm/rowan.svg
 [travis-url]: https://travis-ci.org/MeirionHughes/rowan
 [travis-image]: https://img.shields.io/travis/MeirionHughes/rowan/master.svg
-
-I'm calling it: Q is escrow
-
-There is plenty of resources out there describing the history of IOTA and the work on trinary processors - the fact the tangle transactions pass trinary payloads  means they're still going the route of having dedicated trinary processors to run "something". 
