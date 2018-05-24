@@ -8,6 +8,6 @@ type Context = {
 describe("General", () => {
   it("when constructor without param is called then middleware is an empty array", async () => {
     let rowan: any = new Rowan();
-    expect(rowan._middleware).to.not.be.undefined;
+    expect(rowan.middleware).to.be.eql([]);
   });
 });
