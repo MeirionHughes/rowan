@@ -9,8 +9,8 @@ export class Catch<Ctx = any> extends Rowan<Ctx>{
   }
   async process(ctx: Ctx, next: Next) {
     try {
-      await next();
-    } catch (err) {
+      await super.process(ctx, next);
+    } catch (err) {            
       ctx["error"] = err;
       await this.onerror(ctx as Ctx & HasError);
     }
