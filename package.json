@@ -5,6 +5,7 @@
   "main": "dist/commonjs/index.js",
   "module": "dist/es2015/index.js",
   "typings": "dist/es2015/index.d.ts",
+  "engines" : { "node" : ">=8" },
   "scripts": {
     "lint": "tslint --project tsconfig.json --config tslint.json",
     "clean": "rimraf .tmp .nyc_output coverage dist",
