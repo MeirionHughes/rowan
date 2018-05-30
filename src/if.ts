@@ -18,9 +18,9 @@ export class If<Ctx = any> extends Rowan<Ctx>{
   }
   async process(ctx: Ctx, next: Next): Promise<void> {
     if (await this.predicate(ctx)) {
-      return super.process(ctx, this.terminate ? () => Promise.resolve() : next);
+      await super.process(ctx, this.terminate ? () => Promise.resolve() : next);
     } else {
-      return next();
+      await next();
     }
   }
 }
