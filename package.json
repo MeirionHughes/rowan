@@ -1,6 +1,6 @@
 {
   "name": "rowan",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "description": "A lightweight async middleware library",
   "main": "dist/commonjs/index.js",
   "module": "dist/es2015/index.js",
@@ -30,7 +30,6 @@
     "async",
     "await",
     "typescript",
-    "typed",
     "es2017"
   ],
   "author": "Meirion Hughes <crakinshot@yahoo.com>",
