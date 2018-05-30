@@ -4,19 +4,10 @@ import { Rowan, Next, Middleware, Processor } from "./rowan";
  * wraps execution of its middleware in a try-catch block and calls the callback onerror on an exception 
  */
 export class Catch<Ctx = any> extends Rowan<Ctx>{
-  constructor(private onerror: (ctx: Ctx & HasError) => Promise<void>, middleware?: Processor<Ctx>[]) {
+  constructor(private onError: (err: Error, ctx: Ctx) => Promise<void>, ...middleware: Processor<Ctx>[]) {
     super(middleware);
   }
-  async process(ctx: Ctx, next: Next) {
-    try {
-      await super.process(ctx, next);
-    } catch (err) {            
-      ctx["error"] = err;
-      await this.onerror(ctx as Ctx & HasError);
-    }
+  process(ctx: Ctx, next: Next) {
+    return super.process(ctx, next).catch(err => this.onError(err, ctx as Ctx));
   }
-}
-
-export type HasError = {
-  error: Error;
 }
