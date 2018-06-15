@@ -1,4 +1,4 @@
-import { Rowan, Next, Meta, Processor } from "./rowan";
+import { Rowan, Next, NextNoop, Meta, Processor } from "./rowan";
 
 /**
  * guards execution of a middleware chain with a predicate
@@ -9,18 +9,16 @@ import { Rowan, Next, Meta, Processor } from "./rowan";
 export class If<Ctx = any> extends Rowan<Ctx>{
   private terminate: boolean;
 
-  constructor(predicate: (ctx: Ctx) => Promise<boolean> | boolean, middleware?: Processor<Ctx>[])
-  constructor(predicate: (ctx: Ctx) => Promise<boolean> | boolean, terminate?: boolean)
-  constructor(predicate: (ctx: Ctx) => Promise<boolean> | boolean, middleware: Processor<Ctx>[], terminate?: boolean)
-  constructor(private predicate: (ctx: Ctx) => Promise<boolean> | boolean, arg: Processor<Ctx>[] | boolean, terminate?: boolean) {
+  constructor(predicate: (ctx: Ctx) => Promise<boolean>, middleware?: Processor<Ctx>[])
+  constructor(predicate: (ctx: Ctx) => Promise<boolean>, terminate?: boolean)
+  constructor(predicate: (ctx: Ctx) => Promise<boolean>, middleware: Processor<Ctx>[], terminate?: boolean)
+  constructor(private predicate: (ctx: Ctx) => Promise<boolean>, arg: Processor<Ctx>[] | boolean, terminate?: boolean) {
     super(Array.isArray(arg) ? arg : []);
     this.terminate = !Array.isArray(arg) ? arg : (terminate || false)
   }
-  async process(ctx: Ctx, next: Next): Promise<void> {
-    if (await this.predicate(ctx)) {
-      await super.process(ctx, this.terminate ? () => Promise.resolve() : next);
-    } else {
-      await next();
-    }
+  process(ctx: Ctx, next: Next): Promise<void> {
+    return this.predicate(ctx).then(r =>
+      (r) ? super.process(ctx, this.terminate ? NextNoop : next) : next()
+    );
   }
 }

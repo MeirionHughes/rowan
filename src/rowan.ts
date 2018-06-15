@@ -1,4 +1,5 @@
 export type Next = () => Promise<void>;
+export function NextNoop() { return Promise.resolve(); }
 export type Handler<Ctx> = (ctx: Ctx, next: Next) => Promise<void>;
 export type AutoHandler<Ctx> = (ctx: Ctx) => Promise<void>;
 export type Meta = { [index: string]: any };
@@ -16,7 +17,7 @@ export interface IRowan<Ctx> extends Middleware<Ctx> {
 
 export class Rowan<Ctx=any> implements IRowan<Ctx>{
   middleware: Middleware<Ctx>[];
-  
+
   constructor(middleware: Processor<Ctx>[] = [], public meta?: Meta) {
     this.middleware = middleware.map(x => Rowan.convertToMiddleware(x));
   }
@@ -37,7 +38,7 @@ export class Rowan<Ctx=any> implements IRowan<Ctx>{
       const _next = next; // move into closure scope
       next = function () { return item.process(ctx, _next); };
     }
-    return next()
+    return next();
   }
 
   static convertToMiddleware<Ctx>(input: Middleware<Ctx> | Handler<Ctx> | AutoHandler<Ctx>, meta?: Meta) {
