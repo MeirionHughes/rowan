@@ -1,13 +1,10 @@
 import { expect } from "chai";
-import { Rowan, Catch } from "../src";
 import { If } from "../dist/commonjs";
 
 describe("If", () => {
 
   it("positive predicate calls child handler", async () => {
-
     let wasCalled = false;
-    let next = () => { wasCalled = true; return Promise.resolve(); }
 
     let _if = new If(() => true, [() => { wasCalled = true; return Promise.resolve(); }]);
 
@@ -26,6 +23,25 @@ describe("If", () => {
     await _if.process("foo", next);
 
     expect(nextCalled).to.be.true;
+    expect(wasCalled).to.be.false;
+  });
+
+  it("error during predicate calls is catchable", async () => {
+    let nextCalled = false;
+    let wasCalled = false;
+    let error = Error();
+    let caught = null;
+    let next = () => { throw error }
+
+    let _if = new If(() => false, [(_, n) => { wasCalled = true; return n(); }]);
+
+    try {
+      await _if.process("foo", next);
+    } catch (err) {
+      caught = err;
+    }
+
+    expect(caught).to.be.eq(error);
     expect(wasCalled).to.be.false;
   });
 });

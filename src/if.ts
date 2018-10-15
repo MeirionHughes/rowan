@@ -1,4 +1,4 @@
-import { Rowan, Next, NextNoop, Meta, Processor } from "./rowan";
+import { Rowan, Next, NextNoop, Processor } from "./rowan";
 
 /**
  * guards execution of a middleware chain with a predicate
@@ -6,7 +6,7 @@ import { Rowan, Next, NextNoop, Meta, Processor } from "./rowan";
  * and the given next is called. 
  * if the predicate returns true, then the middleware is executed, with the given next added to the end. 
  */
-export class If<Ctx = any> extends Rowan<Ctx>{
+export class If<Ctx = any> extends Rowan<Ctx> {
   private terminate: boolean;
 
   constructor(predicate: (ctx: Ctx) => Promise<boolean>, middleware?: Processor<Ctx>[])
@@ -17,8 +17,6 @@ export class If<Ctx = any> extends Rowan<Ctx>{
     this.terminate = !Array.isArray(arg) ? arg : (terminate || false)
   }
   process(ctx: Ctx, next: Next): Promise<void> {
-    return this.predicate(ctx).then(r =>
-      (r) ? super.process(ctx, this.terminate ? NextNoop : next) : next()
-    );
+    return this.predicate(ctx).then(r => (r) ? super.process(ctx, this.terminate ? NextNoop : next) : next());
   }
 }

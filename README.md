@@ -42,7 +42,38 @@ await app.execute({ foo: "bar!" });
 
 >foo: bar!
 
-Check the [Documentation](https://github.com/MeirionHughes/rowan/wiki) for more information;
+## Processors
+Processors are either a `Handler<Ctx>`,  `AutoHandler<Ctx>` or `Middleware<Ctx>` type signature. 
+
+* *Handler* is a *two*-parameter function that will be given the  `ctx` and `next` callback. You are required to call `next` if you wish processing to continue to the next middleware processors in the chain. 
+
+```ts
+app.use(async (ctx, next) => {
+  ctx["start"] = Date.now();
+  await next();
+  ctx["finish"] = Date.now();
+});
+```
+
+
+* *AutoHandler* is a *one*-parameter function that will be given the `ctx` object. The next processor in the chain will automatically be called for you, unless you throw an Error. 
+
+```ts
+app.use(async (ctx) => {
+  ctx.data = JSON.parse(ctx.raw);
+});
+```
+
+* *Middleware* is a object containing a method `process` that will be called with *two*-parameters:  `ctx` and `next`. It is expected that `process` will return a `Promise<void>`. 
+
+```ts
+app.use({
+  async process(ctx, next){
+    await next();
+    consol.log("Complete");
+  }
+});
+```
 
 ## Build
 
