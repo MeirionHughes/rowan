@@ -1,12 +1,12 @@
 import { expect } from "chai";
-import { If } from "../dist/commonjs";
+import { If } from "../src";
 
 describe("If", () => {
 
   it("positive predicate calls child handler", async () => {
     let wasCalled = false;
 
-    let _if = new If(() => true, [() => { wasCalled = true; return Promise.resolve(); }]);
+    let _if = new If(() => Promise.resolve(true), [() => { wasCalled = true; return Promise.resolve(); }]);
 
     await _if.process("foo", () => Promise.resolve());
 
@@ -18,7 +18,7 @@ describe("If", () => {
     let wasCalled = false;
     let next = () => { nextCalled = true; return Promise.resolve(); }
 
-    let _if = new If(() => false, [(_, n) => { wasCalled = true; return n(); }]);
+    let _if = new If(() => Promise.resolve(false), [(_, n) => { wasCalled = true; return n(); }]);
 
     await _if.process("foo", next);
 
@@ -33,7 +33,7 @@ describe("If", () => {
     let caught = null;
     let next = () => { throw error }
 
-    let _if = new If(() => false, [(_, n) => { wasCalled = true; return n(); }]);
+    let _if = new If(() => Promise.resolve(false), [(_, n) => { wasCalled = true; return n(); }]);
 
     try {
       await _if.process("foo", next);
