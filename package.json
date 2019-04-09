@@ -5,7 +5,9 @@
   "main": "dist/commonjs/index.js",
   "module": "dist/es2015/index.js",
   "typings": "dist/es2015/index.d.ts",
-  "engines" : { "node" : ">=8" },
+  "engines": {
+    "node": ">=8"
+  },
   "scripts": {
     "lint": "tslint --project tsconfig.json --config tslint.json",
     "clean": "rimraf .tmp .nyc_output coverage dist",
@@ -40,19 +42,19 @@
   "homepage": "https://github.com/MeirionHughes/rowan#readme",
   "devDependencies": {
     "@types/chai": "^3.4.34",
-    "@types/mocha": "^2.2.38",
-    "@types/node": "^6.0.59",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^11.13.2",
     "chai": "^3.5.0",
     "codecov": "^1.0.1",
     "concurrently": "^3.4.0",
     "cross-env": "^3.2.4",
     "minify": "^2.0.13",
-    "mocha": "^3.2.0",
+    "mocha": "^6.1.2",
     "nyc": "^10.1.2",
     "rimraf": "^2.5.4",
-    "ts-node": "^3.2.0",
-    "tslint": "^4.3.1",
-    "typescript": "^2.8.3"
+    "ts-node": "^8.0.3",
+    "tslint": "^5.15.0",
+    "typescript": "^3.4.2"
   },
   "dependencies": {},
   "nyc": {
