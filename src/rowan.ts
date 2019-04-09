@@ -8,7 +8,7 @@ export type Middleware<Ctx> = {
   process(ctx: Ctx, next: Next): Promise<void>;
 }
 
-export type Processor<Ctx> = Handler<Ctx> | AutoHandler<Ctx> | Middleware<Ctx>;
+export type Processor<Ctx> = Handler<Ctx> | AutoHandler<Ctx> | Middleware<Ctx>
 
 export interface IRowan<Ctx> extends Middleware<Ctx> {
   use(h: Processor<Ctx>, meta?: Meta): IRowan<Ctx>;
@@ -41,13 +41,13 @@ export class Rowan<Ctx=any> implements IRowan<Ctx>{
     return next();
   }
 
-  static convertToMiddleware<Ctx>(input: Middleware<Ctx> | Handler<Ctx> | AutoHandler<Ctx>, meta?: Meta) {
+  static convertToMiddleware<Ctx>(input: Processor<Ctx>, meta?: Meta) {
     if (isMiddleware(input)) {
       return input;
     } else {
       return {
         meta: meta || input["meta"],
-        process: isAutoHandler(input) ? async function (ctx, next) { await input(ctx); await next(); } : input
+        process: isAutoHandler(input) ? function (ctx, next) { return input(ctx).then(_ => next()) } : input
       } as Middleware<Ctx>;
     }
   }
