@@ -24,7 +24,7 @@ export class Rowan<Ctx=any> implements IRowan<Ctx>{
 
   use(input: Processor<Ctx>, meta?: any): this {
     this.middleware.push(Rowan.convertToMiddleware(input));
-    this.meta = meta;
+    //this.meta = meta;
     return this;
   }
 
