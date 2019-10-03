@@ -23,7 +23,7 @@ export interface IRowan<Ctx> extends Middleware<Ctx> {
 export class Rowan<Ctx = any> implements IRowan<Ctx>{
   middleware: Middleware<Ctx>[];
 
-  constructor(middleware: Processor<Ctx>[] = [], public meta?: Meta) {
+  constructor(middleware: Processor<Ctx>[] = [], public meta: Meta = {}) {
     this.middleware = middleware.map(x => Rowan.convertToMiddleware(x));
   }
 
