@@ -3,8 +3,11 @@ export function NextNoop() { return Promise.resolve(); }
 export type Handler<Ctx> = (ctx: Ctx, next: Next) => Promise<void>;
 export type AutoHandler<Ctx> = (ctx: Ctx) => Promise<void>;
 export type Meta = { [index: string]: any };
+export type MetaHierarchy = { meta?: Meta, children?: MetaHierarchy[] }
+
 export type Middleware<Ctx> = {
   meta?: Meta;
+  middleware?: Middleware<Ctx>[];
   process(ctx: Ctx, next: Next): Promise<void>;
 }
 
@@ -15,7 +18,9 @@ export interface IRowan<Ctx> extends Middleware<Ctx> {
   readonly middleware: Middleware<Ctx>[];
 }
 
-export class Rowan<Ctx=any> implements IRowan<Ctx>{
+
+
+export class Rowan<Ctx = any> implements IRowan<Ctx>{
   middleware: Middleware<Ctx>[];
 
   constructor(middleware: Processor<Ctx>[] = [], public meta?: Meta) {
@@ -23,8 +28,7 @@ export class Rowan<Ctx=any> implements IRowan<Ctx>{
   }
 
   use(input: Processor<Ctx>, meta?: any): this {
-    this.middleware.push(Rowan.convertToMiddleware(input));
-    //this.meta = meta;
+    this.middleware.push(Rowan.convertToMiddleware(input, meta));
     return this;
   }
 
@@ -43,12 +47,21 @@ export class Rowan<Ctx=any> implements IRowan<Ctx>{
 
   static convertToMiddleware<Ctx>(input: Processor<Ctx>, meta?: Meta) {
     if (isMiddleware(input)) {
+      input.meta = input.meta || meta;
       return input;
     } else {
       return {
-        meta: meta || input["meta"],
+        meta: input["meta"] || meta,
         process: isAutoHandler(input) ? function (ctx, next) { return input(ctx).then(_ => next()) } : input
       } as Middleware<Ctx>;
+    }
+  }
+
+  /** returns the meta hierarchy of middleware */
+  static hierarchy<Ctx>(input: Middleware<Ctx>): MetaHierarchy {
+    return {
+      meta: input.meta,
+      children: input.middleware ? input.middleware.map(Rowan.hierarchy) : undefined
     }
   }
 }
@@ -60,3 +73,4 @@ export function isMiddleware(obj): obj is Middleware<any> {
 export function isAutoHandler(obj): obj is AutoHandler<any> {
   return typeof (obj) === "function" && obj.length <= 1;
 }
+
