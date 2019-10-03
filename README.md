@@ -9,8 +9,6 @@ A lightweight async middleware library.
 [![Travis Status][travis-image]][travis-url]
 [![codecov](https://codecov.io/gh/MeirionHughes/rowan/branch/master/graph/badge.svg)](https://codecov.io/gh/MeirionHughes/rowan)
 
-[Documentation](https://github.com/MeirionHughes/rowan/wiki)
-
 ## Usage
 
 Rowan can be used to build asynchronous middleware-style control-flow and error-handling, with particular focus on providing a rich typescript experience. 
@@ -45,7 +43,7 @@ await app.execute({ foo: "bar!" });
 ## Processors
 Processors are either a `Handler<Ctx>`,  `AutoHandler<Ctx>` or `Middleware<Ctx>` type signature. 
 
-* *Handler* is a *two*-parameter function that will be given the  `ctx` and `next` callback. You are required to call `next` if you wish processing to continue to the next middleware processors in the chain. 
+* *Handler* is a *two*-parameter function that will be given the  `ctx` and `next` callback and should return a Promise. You are required to call `next` if you wish processing to continue to the next middleware processors in the chain. 
 
 ```ts
 app.use(async (ctx, next) => {
@@ -74,6 +72,161 @@ app.use({
   }
 });
 ```
+
+## Helpers
+
+### after-if
+
+calls next and if the predicate returns true executes its middleware
+
+```ts
+let foo = new Rowan();
+
+foo.use(new AfterIf(
+  async (ctx) => ctx.valid, [
+  async (ctx) => {
+    console.log("valid message: ", ctx.msg);
+  }
+]));
+
+foo.use(async (ctx) => {
+  console.log("validate...")
+  if (ctx.msg && ctx.msg.length > 5) {
+    ctx.valid = true
+  }
+})
+
+async function main() {
+  await foo.process({ msg: "hello" });
+  await foo.process({ msg: "hello world" });
+}
+
+main().catch(console.log);
+```
+
+outputs: 
+
+```
+validate...
+validate...
+valid message:  hello world
+```
+
+### after
+
+calls next first, then executes its own middleware afterwards
+
+```ts
+let foo = new Rowan();
+
+foo.use(new After([
+  async (ctx) => {
+    console.log(ctx.output);
+  }
+]));
+
+foo.use(async (ctx) => {
+  console.log("processing...")
+  ctx.output = ctx.msg;
+});
+
+async function main() {
+  await foo.process({ msg: "hello" });
+  await foo.process({ msg: "hello world" });
+}
+
+main().catch(console.log);
+```
+outputs: 
+
+```
+processing...
+hello
+processing...
+hello world
+```
+
+### catch
+
+wraps its _own_ middleware with a try...catch
+
+```ts
+foo.use(
+  new Catch(
+    async (err, ctx) => {
+      console.log("caught: ", err.message);
+    },
+    new Rowan()
+      .use(
+        async (ctx) => {
+          if (ctx != "foo") {
+            throw Error("ctx must be 'foo'");
+          }
+        })
+      .use({
+        meta: { name: "Moo" },
+        async process(ctx, next) {
+          console.log("Moo!");
+          return next();
+        }
+      })
+  ));
+
+async function main() {
+  await foo.process('foo');
+  await foo.process('bar');
+}
+
+main().catch(console.log);
+```
+
+outputs:
+
+```
+Moo!
+caught: ctx must be 'foo'
+```
+
+### if
+
+```ts
+let foo = new Rowan<string>();
+
+foo.use(
+  new If(
+    async (ctx: string) => {
+      return ctx.startsWith("foo");
+    },
+    [async (ctx) => {
+      console.log("IF...", ctx);
+    }],
+    /** terminate if predicate() == true */
+    true, 
+  )
+);
+
+foo.use(async (ctx) => {
+  console.log("Else...", ctx);
+})
+
+async function main() {  
+  await foo.process('foo');
+  await foo.process('foobar');
+  await foo.process('bar');
+}
+
+main().catch(console.log);
+```
+
+outputs: 
+
+```
+IF... foo
+IF... foobar
+Else... bar
+
+```
+
 
 ## Build
 
