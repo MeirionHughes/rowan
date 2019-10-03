@@ -235,7 +235,9 @@ used to build a meta hierarchy from processors that have a `middleware` field de
 
 ```ts
 let foo = new Rowan(undefined, { name: "FOO" });
-let bar = new Rowan(undefined, { name: "BAR" });
+let bar = new Rowan();
+
+bar.meta.name = "Bar";
 
 bar.use((ctx, next) => {
   console.log("boo1:", ctx);
@@ -249,12 +251,15 @@ bar.use(Object.assign((ctx, next) => {
 
 bar.use({
   meta: { name: "Boo3" },
-  process: (ctx, next) => {
-    console.log("boo3:", ctx);
-    return next();
+  middleware: [{
+    meta: { name: "Custom" },
+    process(x, n) { console.log("Custom:", x); return n() }
+  }],
+  process: function (ctx, next) {
+    console.log("Boo3:", ctx);
+    return Rowan.process(this.middleware, ctx, next);
   }
-})
-
+});
 
 foo.use(bar);
 
@@ -270,7 +275,7 @@ outputs:
   "children": [
     {
       "meta": {
-        "name": "BAR"
+        "name": "Bar"
       },
       "children": [
         {
@@ -286,15 +291,74 @@ outputs:
         {
           "meta": {
             "name": "Boo3"
-          }
+          },
+          "children": [
+            {
+              "meta": {
+                "name": "Custom"
+              }
+            }
+          ]
         }
       ]
     }
   ]
 }
 ```
+## Advanced
 
+### Rowan.process()
 
+executes and chains a sequence of `Middleware`, setting up the `next` callback for each. 
+
+```ts
+
+async function main(next: ()=>Promise<void>) {
+  Rowan.process(
+    [{
+      async process(ctx, next) {
+        console.log("first");
+        return next();
+      }
+    },
+    {
+      async process(ctx, next) {
+        console.log("second");
+        return next();
+      }
+    }],
+    {
+      msg: "hello"
+    },
+    //... optional next
+    next
+  )
+}
+main(async () => {
+  console.log("END")
+}).catch(console.log);
+```
+outputs: 
+```
+first
+second
+END
+```
+
+### Rowan.convertToMiddleware()
+
+used interally to convert supported `Handler` types into valid `Middleware`. 
+
+```ts
+Rowan.convertToMiddleware(async (ctx)=>{}, {name: "foo"});
+```
+results in: 
+```
+{ 
+  meta: { name: 'foo' }, 
+  process: [Function] 
+}
+```
 
 ## Build
 
