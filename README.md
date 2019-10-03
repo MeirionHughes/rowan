@@ -227,6 +227,74 @@ Else... bar
 
 ```
 
+## Tools
+
+### Rowan.hierarchy()
+
+used to build a meta hierarchy from processors that have a `middleware` field defined. 
+
+```ts
+let foo = new Rowan(undefined, { name: "FOO" });
+let bar = new Rowan(undefined, { name: "BAR" });
+
+bar.use((ctx, next) => {
+  console.log("boo1:", ctx);
+  return next();
+}, { name: "Boo1" });
+
+bar.use(Object.assign((ctx, next) => {
+  console.log("boo2:", ctx);
+  return next();
+}, { meta: { name: "Boo2" } }));
+
+bar.use({
+  meta: { name: "Boo3" },
+  process: (ctx, next) => {
+    console.log("boo3:", ctx);
+    return next();
+  }
+})
+
+
+foo.use(bar);
+
+console.log(JSON.stringify(Rowan.hierarchy(foo), null, 2));
+```
+outputs: 
+
+```json
+{
+  "meta": {
+    "name": "FOO"
+  },
+  "children": [
+    {
+      "meta": {
+        "name": "BAR"
+      },
+      "children": [
+        {
+          "meta": {
+            "name": "Boo1"
+          }
+        },
+        {
+          "meta": {
+            "name": "Boo2"
+          }
+        },
+        {
+          "meta": {
+            "name": "Boo3"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+
 
 ## Build
 
