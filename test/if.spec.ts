@@ -26,14 +26,13 @@ describe("If", () => {
     expect(wasCalled).to.be.false;
   });
 
-  it("error during predicate calls is catchable", async () => {
-    let nextCalled = false;
+  it("error in next call is catchable", async () => {
     let wasCalled = false;
     let error = Error();
     let caught = null;
     let next = () => { throw error }
 
-    let _if = new If(() => Promise.resolve(false), [(_, n) => { wasCalled = true; return n(); }]);
+    let _if = new If(async () => true, [(_, n) => { wasCalled = true; return n(); }]);
 
     try {
       await _if.process("foo", next);
@@ -42,6 +41,23 @@ describe("If", () => {
     }
 
     expect(caught).to.be.eq(error);
+    expect(wasCalled).to.be.true;
+  }); 
+
+  
+  it("error in predicate call is catchable", async () => {
+    let wasCalled = false;
+    let error = Error();
+    let caught = null;
+
+    let _if = new If(async () => {throw error}, [(_, n) => { wasCalled = true; return n(); }]);
+
+    try {
+      await _if.process("foo", ()=>Promise.resolve());
+    } catch (err) {
+      caught = err;
+    }
     expect(wasCalled).to.be.false;
+    expect(caught).to.be.eq(error);
   });
 });

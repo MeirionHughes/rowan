@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Rowan, Catch } from "../src";
+import { Catch } from "../src";
 
 describe("Catch", () => {
   it("catches errors", async () => {
@@ -38,7 +38,7 @@ describe("Catch", () => {
     } catch (err) {
       result = err;
     }
-    
+
     expect(wasCaught).to.be.true;
     expect(result).to.be.eql(expected);
   });

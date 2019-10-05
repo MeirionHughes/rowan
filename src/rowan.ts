@@ -18,8 +18,6 @@ export interface IRowan<Ctx> extends Middleware<Ctx> {
   readonly middleware: Middleware<Ctx>[];
 }
 
-
-
 export class Rowan<Ctx = any> implements IRowan<Ctx>{
   middleware: Middleware<Ctx>[];
 
@@ -32,11 +30,11 @@ export class Rowan<Ctx = any> implements IRowan<Ctx>{
     return this;
   }
 
-  process(ctx: Ctx, next: Next = () => Promise.resolve()): Promise<void> {
+  process(ctx: Ctx, next: Next = NextNoop): Promise<void> {
     return Rowan.process(this.middleware, ctx, next);
   }
 
-  static process<Ctx>(middleware: Middleware<Ctx>[], ctx: Ctx, next: Next = () => Promise.resolve()): Promise<void> {
+  static process<Ctx>(middleware: Middleware<Ctx>[], ctx: Ctx, next: Next = NextNoop): Promise<void> {
     for (let index = middleware.length - 1; index >= 0; index -= 1) {
       const item = middleware[index];
       next = item.process.bind(item, ctx, next);
