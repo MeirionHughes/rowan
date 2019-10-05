@@ -39,8 +39,7 @@ export class Rowan<Ctx = any> implements IRowan<Ctx>{
   static process<Ctx>(middleware: Middleware<Ctx>[], ctx: Ctx, next: Next = () => Promise.resolve()): Promise<void> {
     for (let index = middleware.length - 1; index >= 0; index -= 1) {
       const item = middleware[index];
-      const _next = next; // move into closure scope
-      next = function () { return item.process(ctx, _next); };
+      next = item.process.bind(item, ctx, next);
     }
     return next();
   }
