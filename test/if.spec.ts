@@ -60,4 +60,48 @@ describe("If", () => {
     expect(wasCalled).to.be.false;
     expect(caught).to.be.eq(error);
   });
+    
+  it("does not call next if terminate true, no middleware", async () => {
+    let wasCalled = false;
+
+    let _if = new If(async () => true, true);
+    
+    await _if.process("foo", async()=>{wasCalled = true});
+
+    expect(wasCalled).to.be.false;
+  }); 
+  
+  it("does not call next if terminate true", async () => {
+    let wasCalled = false;
+    let wasNextCalled = false;
+
+    let _if = new If(async () => true, [async()=>{wasCalled = true}], true);
+    
+    await _if.process("foo", async()=>{wasNextCalled = true});
+
+    expect(wasCalled).to.be.true;
+    expect(wasNextCalled).to.be.false;
+  });
+
+  it("does call next if terminate false, no middleware", async () => {
+    let wasCalled = false;
+
+    let _if = new If(async () => true, false);
+    
+    await _if.process("foo", async()=>{wasCalled = true});
+
+    expect(wasCalled).to.be.true;
+  }); 
+  
+  it("does call next and middlware if terminate false", async () => {
+    let wasCalled = false;
+    let wasNextCalled = false;
+
+    let _if = new If(async () => true, [async()=>{wasCalled = true}], false);
+    
+    await _if.process("foo", async()=>{wasNextCalled = true});
+
+    expect(wasCalled).to.be.true;
+    expect(wasNextCalled).to.be.true;
+  });
 });
