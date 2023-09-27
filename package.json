@@ -1,22 +1,27 @@
 {
   "name": "rowan",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "A lightweight async middleware library",
-  "main": "dist/commonjs/index.js",
-  "module": "dist/es2015/index.js",
-  "typings": "dist/es2015/index.d.ts",
+  "type": "module",
+  "main": "./dist/commonjs/index.js",
+  "module": "./dist/esm/index.js",
+  "typings": "./dist/esm/index.d.ts",
+  "exports" : {
+    "import": "./dist/esm/index.js",
+    "require": "./dist/commonjs/index.js"
+  },
   "engines": {
     "node": ">=8"
   },
   "scripts": {
     "lint": "tslint --project tsconfig.json --config tslint.json",
     "clean": "rimraf .tmp .nyc_output coverage dist",
-    "build": "yarn run clean && concurrently \"yarn run build:es2015\" \"yarn run build:commonjs\"",
-    "build:es2015": "tsc --project tsconfig.build.json --rootDir src/ --outDir ./dist/es2015 --module es2015",
-    "build:commonjs": "tsc --project tsconfig.build.json --rootDir src/ --outDir ./dist/commonjs --module commonjs",
+    "build": "yarn run clean && concurrently \"yarn run build:esm\" \"yarn run build:commonjs\"",
+    "build:esm": "tsc --project tsconfig.build.esm.json --rootDir src/ --outDir ./dist/esm",
+    "build:commonjs": "tsc --project tsconfig.build.cjs.json --rootDir src/ --outDir ./dist/commonjs",
     "debug": "yarn run clean && tsc --project tsconfig.json --outDir ./.tmp/ --module commonjs ",
-    "test": "nyc node_modules/mocha/bin/_mocha  test/*.ts",
-    "cover": "codecov",
+    "test": "c8 -r none mocha test/**/*.ts",
+    "cover": "c8 --check-coverage mocha test/**/*.ts",
     "prepublishOnly": "yarn run test && yarn run build"
   },
   "repository": {
@@ -41,20 +46,19 @@
   },
   "homepage": "https://github.com/MeirionHughes/rowan#readme",
   "devDependencies": {
-    "@types/chai": "^3.4.34",
-    "@types/mocha": "^5.2.6",
-    "@types/node": "^11.13.2",
-    "chai": "^3.5.0",
-    "codecov": "^1.0.1",
-    "concurrently": "^3.4.0",
-    "cross-env": "^3.2.4",
-    "minify": "^2.0.13",
-    "mocha": "^6.1.2",
-    "nyc": "^10.1.2",
-    "rimraf": "^2.5.4",
-    "ts-node": "^8.0.3",
+    "@types/chai": "latest",
+    "@types/mocha": "latest",
+    "@types/node": "latest",
+    "chai": "latest",
+    "codecov": "latest",
+    "concurrently": "latest",
+    "cross-env": "latest",
+    "mocha": "latest",
+    "c8": "latest",
+    "rimraf": "latest",
+    "ts-node": "latest",
     "tslint": "^5.15.0",
-    "typescript": "^3.4.2"
+    "typescript": "latest"
   },
   "dependencies": {},
   "nyc": {

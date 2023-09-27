@@ -1,4 +1,4 @@
-import { Rowan, Next, NextNoop, Processor } from "./rowan";
+import { Rowan, Next, NextNoop, Processor } from "./rowan.js";
 
 /**
  * guards execution of a middleware chain with a predicate

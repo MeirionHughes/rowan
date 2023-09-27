@@ -1,4 +1,4 @@
-import { Rowan, Next, Middleware, Processor } from "./rowan";
+import { Rowan, Next, Processor } from "./rowan.js";
 
 /** 
  * wraps execution of its middleware in a try-catch block and calls the callback onerror on an exception 

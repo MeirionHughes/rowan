@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { If } from "../src";
+import { If } from "../src/if.js";
 
 describe("If", () => {
 

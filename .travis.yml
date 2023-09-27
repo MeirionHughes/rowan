@@ -4,6 +4,6 @@ cache:
   directories:
     - node_modules
 node_js:
-- "8.1"
+- "18"
 after_success: 
 - npm run cover

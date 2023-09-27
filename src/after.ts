@@ -1,4 +1,4 @@
-import { Rowan, Next, Processor } from "./rowan";
+import { Rowan, Next } from "./rowan.js";
 
 /** 
  * executes its middleware after next has returned. 

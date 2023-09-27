@@ -1,5 +1,5 @@
-import { After } from './src';
-import { Rowan } from './src';
+import { After } from './src/index.js';
+import { Rowan } from './src/index.js';
 
 let foo = new Rowan();
 let bar = new Rowan();

@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import {  AfterIf } from "../src";
+import {  AfterIf } from "../src/after-if.js";
 
 describe("AfterIf", () => {
 

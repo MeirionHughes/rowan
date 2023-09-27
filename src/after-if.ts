@@ -1,4 +1,4 @@
-import { Rowan, Next, Processor } from "./rowan";
+import { Rowan, Next, Processor } from "./rowan.js";
 
 /**
  * calls next then, if the predicate returns true, executes the given middleware

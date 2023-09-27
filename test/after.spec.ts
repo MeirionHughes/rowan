@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { After } from "../src";
+import { After } from "../src/after.js";
 
 describe("After", () => {
   it("calls middleware after next", async () => {
