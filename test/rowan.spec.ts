@@ -41,6 +41,36 @@ describe("Rowan", () => {
       Rowan.convertToMiddleware = old;
       expect(wasCalled).to.be.true;
     });
+    it("can auto infer use context", async ()=>{
+      let rowan = new Rowan<{foo: "bar"}>();
+
+      rowan.use(async ({foo})=>{
+        foo = "bar";
+      })
+    })
+    it("can auto call next if parameter not defined within callback", async ()=>{
+      let rowan = new Rowan<{foo: "bar"}>();
+      let wasCalled = false;
+      let wasNotCalled = true;
+
+      rowan.use(async ({foo})=>{
+        foo = "bar";
+      })
+
+      rowan.use(async ({foo}, next)=>{
+        wasCalled = true; 
+        return void 0;
+      }) 
+
+      rowan.use(async ({foo}, next)=>{
+        wasNotCalled = false; 
+      })
+      
+      await rowan.process({foo:"bar"});
+
+      expect(wasCalled).to.be.true;
+      expect(wasNotCalled).to.be.true;
+    })
   });
 
   describe("process", () => {

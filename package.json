@@ -1,6 +1,7 @@
 {
   "name": "rowan",
-  "version": "1.1.0",
+  "type": "commonjs",
+  "version": "2.0.0",
   "description": "A lightweight async middleware library",
   "main": "dist/commonjs/index.js",
   "module": "dist/es2015/index.js",

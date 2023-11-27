@@ -1,7 +1,6 @@
 export type Next = () => Promise<void>;
 export function NextNoop() { return Promise.resolve(); }
-export type Handler<Ctx> = (ctx: Ctx, next: Next) => Promise<void>;
-export type AutoHandler<Ctx> = (ctx: Ctx) => Promise<void>;
+export type Handler<Ctx> = (ctx: Ctx, next?:Next) => Promise<void>;
 export type Meta = { [index: string]: any };
 export type MetaHierarchy = { meta?: Meta, children?: MetaHierarchy[] }
 
@@ -11,7 +10,7 @@ export type Middleware<Ctx> = {
   process(ctx: Ctx, next: Next): Promise<void>;
 }
 
-export type Processor<Ctx> = Handler<Ctx> | AutoHandler<Ctx> | Middleware<Ctx>
+export type Processor<Ctx> = Handler<Ctx> | Middleware<Ctx>
 
 export interface IRowan<Ctx> extends Middleware<Ctx> {
   use(h: Processor<Ctx>, meta?: Meta): IRowan<Ctx>;
@@ -49,7 +48,7 @@ export class Rowan<Ctx = any> implements IRowan<Ctx>{
     } else {
       return {
         meta: input["meta"] || meta,
-        process: isAutoHandler(input) ? function (ctx, next) { return input(ctx).then(_ => next()) } : input
+        process: isAutoHandler(input) ? function (ctx, next) { return input(ctx, undefined).then(_ => next()) } : input
       } as Middleware<Ctx>;
     }
   }
@@ -67,7 +66,7 @@ export function isMiddleware(obj): obj is Middleware<any> {
   return typeof (obj) === "object" && typeof (obj["process"]) === "function";
 }
 
-export function isAutoHandler(obj): obj is AutoHandler<any> {
+export function isAutoHandler(obj): boolean {
   return typeof (obj) === "function" && obj.length <= 1;
 }
 
