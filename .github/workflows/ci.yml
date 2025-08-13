@@ -41,14 +41,14 @@ jobs:
     - name: Run tests with coverage
       run: npm run test:cover
     
-    - name: Build
-      run: npm run build
-    
     - name: Upload coverage reports
       if: matrix.node-version == '22.x' && github.ref == 'refs/heads/master'
       uses: actions/upload-pages-artifact@v3
       with:
         path: coverage/
+    
+    - name: Build
+      run: npm run build
   
   deploy-pages:
     if: github.ref == 'refs/heads/master'
