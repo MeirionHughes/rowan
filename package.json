@@ -23,7 +23,7 @@
     "build:cjs": "tsc --project tsconfig.build.json --rootDir src/ --outDir ./dist/cjs --module commonjs --declaration false && node -e \"require('fs').writeFileSync('dist/cjs/package.json', '{\\\"type\\\":\\\"commonjs\\\"}')\"",
     "debug": "npm run clean && tsc --project tsconfig.json --outDir ./.tmp/ --module commonjs",
     "test": "mocha test/**/*.spec.ts",
-    "test:cover": "c8 npm test",
+    "test:cover": "c8 --reporter=html --reporter=lcov --reporter=json-summary npm test",
     "prepublishOnly": "npm run test && npm run build"
   },
   "repository": {

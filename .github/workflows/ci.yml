@@ -50,6 +50,8 @@ jobs:
         FUNCTIONS=$(node -p "Math.round(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.functions.pct)")
         BRANCHES=$(node -p "Math.round(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.branches.pct)")
         
+        echo "Coverage: Statements=${STATEMENTS}%, Lines=${LINES}%, Functions=${FUNCTIONS}%, Branches=${BRANCHES}%"
+        
         # Create shields.io compatible JSON
         cat > coverage/coverage-badge.json << EOF
         {
