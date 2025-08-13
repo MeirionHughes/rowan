@@ -1,18 +1,12 @@
-.github
-.vscode
-.editorconfig
-.nyc_output
-.npmignore
-.travis.yml
-spec
-test
-src
-coverage
-tsconfig*
-tsfmt.json
-tslint.json
-example.js
-gulpfile.js
-yarn.lock
-example.ts
+# Block everything by default
+*
+
+# Include only production files
+!dist/
+!package.json
+!README.md
+!LICENSE
+
+# Ensure subdirectories in dist are included
+!dist/**
 
