@@ -41,6 +41,36 @@ jobs:
     - name: Run tests with coverage
       run: npm run test:cover
     
+    - name: Generate coverage JSON for badge
+      if: matrix.node-version == '22.x' && github.ref == 'refs/heads/master'
+      run: |
+        # Extract coverage percentages from coverage-summary.json
+        STATEMENTS=$(node -p "Math.round(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.statements.pct)")
+        LINES=$(node -p "Math.round(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.lines.pct)")
+        FUNCTIONS=$(node -p "Math.round(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.functions.pct)")
+        BRANCHES=$(node -p "Math.round(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.branches.pct)")
+        
+        # Create shields.io compatible JSON
+        cat > coverage/coverage-badge.json << EOF
+        {
+          "schemaVersion": 1,
+          "label": "coverage",
+          "message": "${STATEMENTS}%",
+          "color": "brightgreen"
+        }
+        EOF
+        
+        # Also create detailed coverage JSON
+        cat > coverage/coverage-details.json << EOF
+        {
+          "statements": ${STATEMENTS},
+          "lines": ${LINES},
+          "functions": ${FUNCTIONS},
+          "branches": ${BRANCHES},
+          "overall": ${STATEMENTS}
+        }
+        EOF
+    
     - name: Upload coverage reports
       if: matrix.node-version == '22.x' && github.ref == 'refs/heads/master'
       uses: actions/upload-pages-artifact@v3

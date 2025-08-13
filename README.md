@@ -7,7 +7,7 @@ A lightweight async middleware library with comprehensive TypeScript support.
 [![NPM version](https://img.shields.io/npm/v/rowan.svg)](https://npmjs.org/package/rowan)
 [![NPM downloads](https://img.shields.io/npm/dm/rowan.svg)](https://npmjs.org/package/rowan)
 [![CI Status](https://github.com/MeirionHughes/rowan/actions/workflows/ci.yml/badge.svg)](https://github.com/MeirionHughes/rowan/actions/workflows/ci.yml)
-[![Coverage Report](https://img.shields.io/badge/Coverage-Report-brightgreen.svg)](https://meirionhughes.github.io/rowan/)
+[![Coverage](https://img.shields.io/endpoint?url=https://meirionhughes.github.io/rowan/coverage-badge.json)](https://meirionhughes.github.io/rowan/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![ESM/CJS](https://img.shields.io/badge/Module-ESM%2FCJS-yellow.svg)](https://nodejs.org/api/esm.html)
@@ -17,17 +17,6 @@ A lightweight async middleware library with comprehensive TypeScript support.
 ```bash
 npm install rowan
 ```
-
-## Features
-
-- **🚀 Modern TypeScript**: Built with TypeScript 5.3+ with comprehensive type safety
-- **📦 Dual Package**: Supports both ESM (`import`) and CommonJS (`require`)
-- **⚡ Lightweight**: Zero dependencies, minimal footprint
-- **🔧 Flexible**: Support for handlers, auto-handlers, and middleware objects
-- **🛡️ Error Handling**: Built-in error handling with `Catch` middleware
-- **🔀 Conditional Logic**: `If` and `AfterIf` for conditional execution
-- **📋 Comprehensive Testing**: 100% statement and line coverage
-- **🔍 Development Tools**: Rich debugging and introspection capabilities
 
 ## Usage
 
@@ -392,43 +381,10 @@ rowan/
 └── coverage/      # Coverage reports
 ```
 
-### Running Examples
-
-There's an example file you can run to see Rowan in action:
-
-```bash
-npx tsx example.ts
-```
-
-## API Documentation
-
-All exported functions and classes include comprehensive JSDoc documentation with examples. Your IDE will provide full IntelliSense support with detailed parameter information and usage examples.
-
-## Testing
-
-Rowan maintains excellent test coverage with comprehensive testing across all functionality:
-
-- **100% Statement Coverage**
-- **100% Line Coverage** 
-- **96%+ Function Coverage**
-- **88%+ Branch Coverage**
-
-📊 **[View Full Coverage Report](https://meirionhughes.github.io/rowan/)** - Interactive coverage report with detailed file-by-file analysis
-
-Tests are written using Mocha and Chai, and run with the `tsx` loader for direct TypeScript execution. The coverage report is automatically updated on every push to the master branch.
-
 ## Requirements
 
 - **Node.js** >= 18.0.0
 - **TypeScript** >= 5.0.0 (for development)
-
-## Package Details
-
-- **Zero Dependencies**: Lightweight with no runtime dependencies
-- **Dual Package**: Supports both ESM (`import`) and CommonJS (`require`)
-- **Type Definitions**: Full TypeScript support with comprehensive type definitions
-- **Modern JavaScript**: Built with ES2022+ features
-- **Backwards Compatible**: Supports Node.js 18+
 
 ## License
 
