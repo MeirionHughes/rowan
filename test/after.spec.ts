@@ -1,10 +1,10 @@
 import { expect } from "chai";
-import { After } from "../src";
+import { After } from "../src/index.js";
 
 describe("After", () => {
   it("calls middleware after next", async () => {
     let wasCalled = false;
-    let order = [];
+    let order:string[] = [];
 
     let _after = new After([
         () => { wasCalled = true; order.push("bar"); return Promise.resolve(); }

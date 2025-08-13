@@ -1,17 +1,17 @@
-import { After } from './src';
-import { Rowan } from './src';
+
+import { Rowan } from './src/index.js';
 
 let foo = new Rowan();
 let bar = new Rowan();
 
 bar.use((ctx, next) => {
   console.log("boo1:", ctx);
-  return next();
+  return next!();
 });
 
 bar.use((ctx, next) => {
   console.log("boo2:", ctx);
-  return next();
+  return next!();
 });
 
 foo.use(bar);

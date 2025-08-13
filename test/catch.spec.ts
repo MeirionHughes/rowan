@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Catch } from "../src";
+import { Catch } from "../src/index.js";
 
 describe("Catch", () => {
   it("catches errors", async () => {

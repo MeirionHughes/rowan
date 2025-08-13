@@ -1,0 +1,7 @@
+{
+  "import": ["tsx"],
+  "extensions": ["ts"],
+  "spec": "test/**/*.spec.ts",
+  "timeout": 5000,
+  "recursive": true
+}

@@ -1,9 +1,0 @@
-language: node_js
-cache:
-  yarn: true
-  directories:
-    - node_modules
-node_js:
-- "8.1"
-after_success: 
-- npm run cover

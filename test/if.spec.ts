@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { If } from "../src";
+import { If } from "../src/index.js";
 
 describe("If", () => {
 
@@ -18,7 +18,7 @@ describe("If", () => {
     let wasCalled = false;
     let next = () => { nextCalled = true; return Promise.resolve(); }
 
-    let _if = new If(() => Promise.resolve(false), [(_, n) => { wasCalled = true; return n(); }]);
+    let _if = new If(() => Promise.resolve(false), [(_, n) => { wasCalled = true; return n!(); }]);
 
     await _if.process("foo", next);
 
@@ -32,7 +32,7 @@ describe("If", () => {
     let caught = null;
     let next = () => { throw error }
 
-    let _if = new If(async () => true, [(_, n) => { wasCalled = true; return n(); }]);
+    let _if = new If(async () => true, [(_, n) => { wasCalled = true; return n!(); }]);
 
     try {
       await _if.process("foo", next);
@@ -50,7 +50,7 @@ describe("If", () => {
     let error = Error();
     let caught = null;
 
-    let _if = new If(async () => {throw error}, [(_, n) => { wasCalled = true; return n(); }]);
+    let _if = new If(async () => {throw error}, [(_, n) => { wasCalled = true; return n!(); }]);
 
     try {
       await _if.process("foo", ()=>Promise.resolve());
@@ -103,5 +103,27 @@ describe("If", () => {
 
     expect(wasCalled).to.be.true;
     expect(wasNextCalled).to.be.true;
+  });
+
+  it("should work with predicate and terminate boolean only", async () => {
+    let nextCalled = false;
+    let next = () => { nextCalled = true; return Promise.resolve(); }
+
+    let _if = new If(() => Promise.resolve(true), true);
+
+    await _if.process("foo", next);
+
+    expect(nextCalled).to.be.false; // terminate = true, so next should not be called
+  });
+
+  it("should work with predicate and false terminate", async () => {
+    let nextCalled = false;
+    let next = () => { nextCalled = true; return Promise.resolve(); }
+
+    let _if = new If(() => Promise.resolve(true), false);
+
+    await _if.process("foo", next);
+
+    expect(nextCalled).to.be.true; // terminate = false, so next should be called
   });
 });

@@ -1,11 +1,11 @@
 import { expect } from "chai";
-import {  AfterIf } from "../src";
+import {  AfterIf } from "../src/index.js";
 
 describe("AfterIf", () => {
 
   it("positive predicate calls child handler after next", async () => {
     let wasCalled = false;
-    let order = [];
+    let order:string[] = [];
 
     let _after = new AfterIf(
       () => Promise.resolve(true), [
@@ -20,7 +20,7 @@ describe("AfterIf", () => {
 
   it("negative predicate skips middleware", async () => {
     let wasCalled = false;
-    let order = [];
+    let order:string[] = [];
 
     let _after = new AfterIf(
       () => Promise.resolve(false), [
@@ -40,7 +40,7 @@ describe("AfterIf", () => {
     let caught = null;
     let next = () => { throw error }
 
-    let _if = new AfterIf(() => {throw error}, [(_, n) => { wasCalled = true; return n(); }]);
+    let _if = new AfterIf(() => {throw error}, [(_, n) => { wasCalled = true; return n!(); }]);
 
     try {
       await _if.process("foo", next);
@@ -50,5 +50,17 @@ describe("AfterIf", () => {
 
     expect(caught).to.be.eq(error);
     expect(wasCalled).to.be.false;
+  });
+
+  it("positive predicate with no handlers to execute", async () => {
+    let order:string[] = [];
+
+    let _after = new AfterIf(
+      () => Promise.resolve(true), []
+    );
+
+    await _after.process("foo", () => {order.push("foo"); return Promise.resolve()});
+
+    expect(order).to.be.eql(["foo"]);
   });
 });

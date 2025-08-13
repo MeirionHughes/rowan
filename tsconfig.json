@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "module": "commonjs",
+    "target": "ES2022",
+    "module": "ESNext",
     "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": true,
     "noEmitOnError": true,
     "newLine": "LF",
     "experimentalDecorators": true,
@@ -10,13 +13,16 @@
     "importHelpers": false,
     "removeComments": true,
     "sourceMap": true,
+    "resolveJsonModule": true,
     "lib": [
-      "es2017",
-      "dom"
+      "ES2022"
     ],
     "typeRoots": [
       "node_modules/@types"
     ]
+  },
+  "ts-node": {
+    "esm": true
   },
   "exclude": [
     "node_modules",

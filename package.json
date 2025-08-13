@@ -1,24 +1,30 @@
 {
   "name": "rowan",
-  "type": "commonjs",
-  "version": "2.0.0",
+  "type": "module",
+  "version": "2.1.0",
   "description": "A lightweight async middleware library",
-  "main": "dist/commonjs/index.js",
-  "module": "dist/es2015/index.js",
-  "typings": "dist/es2015/index.d.ts",
+  "main": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/esm/index.d.ts"
+    }
+  },
   "engines": {
-    "node": ">=8"
+    "node": ">=18"
   },
   "scripts": {
-    "lint": "tslint --project tsconfig.json --config tslint.json",
+    "lint": "eslint src test --ext .ts",
     "clean": "rimraf .tmp .nyc_output coverage dist",
-    "build": "yarn run clean && concurrently \"yarn run build:es2015\" \"yarn run build:commonjs\"",
-    "build:es2015": "tsc --project tsconfig.build.json --rootDir src/ --outDir ./dist/es2015 --module es2015",
-    "build:commonjs": "tsc --project tsconfig.build.json --rootDir src/ --outDir ./dist/commonjs --module commonjs",
-    "debug": "yarn run clean && tsc --project tsconfig.json --outDir ./.tmp/ --module commonjs ",
-    "test": "nyc node_modules/mocha/bin/_mocha  test/*.ts",
-    "cover": "codecov",
-    "prepublishOnly": "yarn run test && yarn run build"
+    "build": "npm run clean && npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc --project tsconfig.build.json --rootDir src/ --outDir ./dist/esm --module es2022",
+    "build:cjs": "tsc --project tsconfig.build.json --rootDir src/ --outDir ./dist/cjs --module commonjs --declaration false && node -e \"require('fs').writeFileSync('dist/cjs/package.json', '{\\\"type\\\":\\\"commonjs\\\"}')\"",
+    "debug": "npm run clean && tsc --project tsconfig.json --outDir ./.tmp/ --module commonjs",
+    "test": "mocha test/**/*.spec.ts",
+    "test:cover": "c8 npm test",
+    "prepublishOnly": "npm run test && npm run build"
   },
   "repository": {
     "type": "git",
@@ -42,45 +48,18 @@
   },
   "homepage": "https://github.com/MeirionHughes/rowan#readme",
   "devDependencies": {
-    "@types/chai": "^3.4.34",
-    "@types/mocha": "^5.2.6",
-    "@types/node": "^11.13.2",
-    "chai": "^3.5.0",
-    "codecov": "^1.0.1",
-    "concurrently": "^3.4.0",
-    "cross-env": "^3.2.4",
-    "minify": "^2.0.13",
-    "mocha": "^6.1.2",
-    "nyc": "^10.1.2",
-    "rimraf": "^2.5.4",
-    "ts-node": "^8.0.3",
-    "tslint": "^5.15.0",
-    "typescript": "^3.4.2"
-  },
-  "dependencies": {},
-  "nyc": {
-    "include": [
-      "src/**/*.ts"
-    ],
-    "exclude": [
-      "node_modules/",
-      "dist/"
-    ],
-    "extension": [
-      ".ts",
-      ".tsx"
-    ],
-    "require": [
-      "ts-node/register",
-      "source-map-support/register",
-      "ts-node/register"
-    ],
-    "reporter": [
-      "text-summary",
-      "html",
-      "lcov"
-    ],
-    "sourceMap": true,
-    "instrument": true
+    "@eslint/js": "^9.33.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
+    "c8": "^9.0.0",
+    "chai": "^5.0.0",
+    "eslint": "^9.33.0",
+    "mocha": "^11.0.0",
+    "rimraf": "^5.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
   }
 }

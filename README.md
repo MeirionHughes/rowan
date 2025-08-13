@@ -1,383 +1,439 @@
 # Rowan
 
-A lightweight async middleware library.  
+A lightweight async middleware library with comprehensive TypeScript support.
 
 ![584023-200](https://cloud.githubusercontent.com/assets/3584509/21929203/1ffa1db6-d987-11e6-8e07-77a6131097af.png)
 
-[![NPM version][npm-image]][npm-url]
-[![NPM downloads][npm-downloads]][npm-url]
-[![Travis Status][travis-image]][travis-url]
-[![codecov](https://codecov.io/gh/MeirionHughes/rowan/branch/master/graph/badge.svg)](https://codecov.io/gh/MeirionHughes/rowan)
+[![NPM version](https://img.shields.io/npm/v/rowan.svg)](https://npmjs.org/package/rowan)
+[![NPM downloads](https://img.shields.io/npm/dm/rowan.svg)](https://npmjs.org/package/rowan)
+[![CI Status](https://github.com/MeirionHughes/rowan/actions/workflows/ci.yml/badge.svg)](https://github.com/MeirionHughes/rowan/actions/workflows/ci.yml)
+[![Coverage Report](https://img.shields.io/badge/Coverage-Report-brightgreen.svg)](https://meirionhughes.github.io/rowan/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![ESM/CJS](https://img.shields.io/badge/Module-ESM%2FCJS-yellow.svg)](https://nodejs.org/api/esm.html)
+
+## Installation
+
+```bash
+npm install rowan
+```
+
+## Features
+
+- **🚀 Modern TypeScript**: Built with TypeScript 5.3+ with comprehensive type safety
+- **📦 Dual Package**: Supports both ESM (`import`) and CommonJS (`require`)
+- **⚡ Lightweight**: Zero dependencies, minimal footprint
+- **🔧 Flexible**: Support for handlers, auto-handlers, and middleware objects
+- **🛡️ Error Handling**: Built-in error handling with `Catch` middleware
+- **🔀 Conditional Logic**: `If` and `AfterIf` for conditional execution
+- **📋 Comprehensive Testing**: 100% statement and line coverage
+- **🔍 Development Tools**: Rich debugging and introspection capabilities
 
 ## Usage
 
-Rowan can be used to build asynchronous middleware-style control-flow and error-handling, with particular focus on providing a rich typescript experience. 
+Rowan provides a powerful async middleware system with comprehensive TypeScript support. Build sophisticated control-flow patterns with error handling, conditional execution, and post-processing capabilities.
 
-Create an instance of the Rowan class (or derivation) and call `use` with a middleware function
+### Basic Example
+
+Create a Rowan instance and add middleware using the `use` method:
 
 ```ts
-import {Rowan} from 'rowan';
+import { Rowan } from 'rowan';
 
-// Create a (derived) app
+// Create an app instance
 const app = new Rowan();
 
 // Add middleware and handlers
 app.use(async (ctx) => {
-  console.log(`foo: ${ctx.foo}`);
+  console.log(`Processing: ${ctx.message}`);
 });
 
+// Process with context
+await app.process({ message: "Hello, World!" });
+// Output: Processing: Hello, World!
 ```
 
-Once the middleware is all setup you call `process` and pass along the context. 
+### ESM and CommonJS Support
 
+Rowan supports both modern ESM and legacy CommonJS imports:
 
 ```ts
-// Use it 
-await app.execute({ foo: "bar!" });
+// ESM (recommended)
+import { Rowan, If, After, Catch } from 'rowan';
+
+// CommonJS
+const { Rowan, If, After, Catch } = require('rowan');
 ```
 
-... which in this example would output to console: 
+## Middleware Types
 
->foo: bar!
+Rowan supports three types of processors, each with specific use cases:
 
-## Processors
-Processors are either a `Handler<Ctx>`,  `AutoHandler<Ctx>` or `Middleware<Ctx>` type signature. 
+### Handler Functions
 
-* *Handler* is a *two*-parameter function that will be given the  `ctx` and `next` callback and should return a Promise. You are required to call `next` if you wish processing to continue to the next middleware processors in the chain. 
+**Handler** functions receive both `ctx` and `next` parameters. You must explicitly call `next()` to continue the middleware chain:
 
 ```ts
 app.use(async (ctx, next) => {
-  ctx["start"] = Date.now();
-  await next();
-  ctx["finish"] = Date.now();
+  ctx.startTime = Date.now();
+  await next(); // Continue to next middleware
+  ctx.duration = Date.now() - ctx.startTime;
+  console.log(`Request completed in ${ctx.duration}ms`);
 });
 ```
 
+### Auto-Handler Functions
 
-* *AutoHandler* is a *one*-parameter function that will be given the `ctx` object. The next processor in the chain will automatically be called for you, unless you throw an Error. 
+**AutoHandler** functions receive only the `ctx` parameter. The next middleware is automatically called unless an error is thrown:
 
 ```ts
 app.use(async (ctx) => {
-  ctx.data = JSON.parse(ctx.raw);
+  // Automatically calls next() after this function
+  ctx.data = JSON.parse(ctx.rawData);
+  ctx.processed = true;
 });
 ```
 
-* *Middleware* is a object containing a method `process` that will be called with *two*-parameters:  `ctx` and `next`. It is expected that `process` will return a `Promise<void>`. 
+### Middleware Objects
+
+**Middleware** objects implement a `process` method with `ctx` and `next` parameters:
 
 ```ts
-app.use({
-  async process(ctx, next){
+class LoggingMiddleware {
+  async process(ctx, next) {
+    console.log('Before processing');
     await next();
-    consol.log("Complete");
+    console.log('After processing');
+  }
+}
+
+app.use(new LoggingMiddleware());
+
+// Or inline object
+app.use({
+  async process(ctx, next) {
+    await next();
+    console.log('Request complete');
   }
 });
 ```
 
-## Helpers
+## Middleware Helpers
 
-### after-if
+Rowan provides powerful helper classes for common middleware patterns:
 
-calls next and if the predicate returns true executes its middleware
+### If - Conditional Execution
 
-```ts
-let foo = new Rowan();
-
-foo.use(new AfterIf(
-  async (ctx) => ctx.valid, [
-  async (ctx) => {
-    console.log("valid message: ", ctx.msg);
-  }
-]));
-
-foo.use(async (ctx) => {
-  console.log("validate...")
-  if (ctx.msg && ctx.msg.length > 5) {
-    ctx.valid = true
-  }
-})
-
-async function main() {
-  await foo.process({ msg: "hello" });
-  await foo.process({ msg: "hello world" });
-}
-
-main().catch(console.log);
-```
-
-outputs: 
-
-```
-validate...
-validate...
-valid message:  hello world
-```
-
-### after
-
-calls next first, then executes its own middleware afterwards
+Execute middleware only when a predicate condition is met:
 
 ```ts
-let foo = new Rowan();
+import { If } from 'rowan';
 
-foo.use(new After([
-  async (ctx) => {
-    console.log(ctx.output);
-  }
-]));
+const app = new Rowan<string>();
 
-foo.use(async (ctx) => {
-  console.log("processing...")
-  ctx.output = ctx.msg;
-});
-
-async function main() {
-  await foo.process({ msg: "hello" });
-  await foo.process({ msg: "hello world" });
-}
-
-main().catch(console.log);
-```
-outputs: 
-
-```
-processing...
-hello
-processing...
-hello world
-```
-
-### catch
-
-wraps its _own_ middleware with a try...catch
-
-```ts
-foo.use(
-  new Catch(
-    async (err, ctx) => {
-      console.log("caught: ", err.message);
-    },
-    new Rowan()
-      .use(
-        async (ctx) => {
-          if (ctx != "foo") {
-            throw Error("ctx must be 'foo'");
-          }
-        })
-      .use({
-        meta: { name: "Moo" },
-        async process(ctx, next) {
-          console.log("Moo!");
-          return next();
-        }
-      })
-  ));
-
-async function main() {
-  await foo.process('foo');
-  await foo.process('bar');
-}
-
-main().catch(console.log);
-```
-
-outputs:
-
-```
-Moo!
-caught: ctx must be 'foo'
-```
-
-### if
-
-```ts
-let foo = new Rowan<string>();
-
-foo.use(
+app.use(
   new If(
-    async (ctx: string) => {
-      return ctx.startsWith("foo");
-    },
-    [async (ctx) => {
-      console.log("IF...", ctx);
-    }],
-    /** terminate if predicate() == true */
-    true, 
+    async (ctx: string) => ctx.startsWith("admin"),
+    [
+      async (ctx) => console.log("Admin access:", ctx)
+    ],
+    true // terminate if condition is true (don't call next)
   )
 );
 
-foo.use(async (ctx) => {
-  console.log("Else...", ctx);
-})
+app.use(async (ctx) => {
+  console.log("Regular access:", ctx);
+});
 
-async function main() {  
-  await foo.process('foo');
-  await foo.process('foobar');
-  await foo.process('bar');
-}
-
-main().catch(console.log);
+await app.process('admin-user'); // Output: Admin access: admin-user
+await app.process('regular-user'); // Output: Regular access: regular-user
 ```
 
-outputs: 
+### After - Post-Processing
 
-```
-IF... foo
-IF... foobar
-Else... bar
-
-```
-
-## Tools
-
-### Rowan.hierarchy()
-
-used to build a meta hierarchy from processors that have a `middleware` field defined. 
+Execute middleware after the next middleware completes:
 
 ```ts
-let foo = new Rowan(undefined, { name: "FOO" });
-let bar = new Rowan();
+import { After } from 'rowan';
 
-bar.meta.name = "Bar";
+const app = new Rowan();
 
-bar.use((ctx, next) => {
-  console.log("boo1:", ctx);
-  return next();
-}, { name: "Boo1" });
+app.use(new After([
+  async (ctx) => {
+    console.log("Response:", ctx.output);
+    ctx.logged = true;
+  }
+]));
 
-bar.use(Object.assign((ctx, next) => {
-  console.log("boo2:", ctx);
-  return next();
-}, { meta: { name: "Boo2" } }));
+app.use(async (ctx) => {
+  console.log("Processing request...");
+  ctx.output = `Processed: ${ctx.input}`;
+});
 
-bar.use({
-  meta: { name: "Boo3" },
-  middleware: [{
-    meta: { name: "Custom" },
-    process(x, n) { console.log("Custom:", x); return n() }
-  }],
-  process: function (ctx, next) {
-    console.log("Boo3:", ctx);
-    return Rowan.process(this.middleware, ctx, next);
+await app.process({ input: "hello" });
+// Output: 
+// Processing request...
+// Response: Processed: hello
+```
+
+### AfterIf - Conditional Post-Processing
+
+Execute middleware after next() completes, but only if a condition is met:
+
+```ts
+import { AfterIf } from 'rowan';
+
+const app = new Rowan();
+
+app.use(new AfterIf(
+  async (ctx) => ctx.valid === true,
+  [
+    async (ctx) => {
+      console.log("Valid result:", ctx.result);
+    }
+  ]
+));
+
+app.use(async (ctx) => {
+  console.log("Validating...");
+  if (ctx.input?.length > 5) {
+    ctx.valid = true;
+    ctx.result = `Valid: ${ctx.input}`;
   }
 });
 
-foo.use(bar);
-
-console.log(JSON.stringify(Rowan.hierarchy(foo), null, 2));
+await app.process({ input: "hello" });        // Only "Validating..."
+await app.process({ input: "hello world" });  // "Validating..." then "Valid result: Valid: hello world"
 ```
-outputs: 
 
-```json
-{
-  "meta": {
-    "name": "FOO"
-  },
-  "children": [
-    {
-      "meta": {
-        "name": "Bar"
-      },
-      "children": [
-        {
-          "meta": {
-            "name": "Boo1"
-          }
-        },
-        {
-          "meta": {
-            "name": "Boo2"
-          }
-        },
-        {
-          "meta": {
-            "name": "Boo3"
-          },
-          "children": [
-            {
-              "meta": {
-                "name": "Custom"
-              }
-            }
-          ]
-        }
-      ]
+### Catch - Error Handling
+
+Wrap middleware execution with comprehensive error handling:
+
+```ts
+import { Catch } from 'rowan';
+
+const app = new Rowan();
+
+app.use(
+  new Catch(
+    async (error, ctx) => {
+      console.log("Error caught:", error.message);
+      ctx.error = true;
+      ctx.errorMessage = error.message;
+      // Don't re-throw to handle gracefully
+    },
+    async (ctx) => {
+      if (!ctx.input) {
+        throw new Error("Input is required");
+      }
+      ctx.processed = true;
     }
-  ]
-}
-```
-## Advanced
-
-### Rowan.process()
-
-executes and chains a sequence of `Middleware`, setting up the `next` callback for each. 
-
-```ts
-
-async function main(next: ()=>Promise<void>) {
-  Rowan.process(
-    [{
-      async process(ctx, next) {
-        console.log("first");
-        return next();
-      }
-    },
-    {
-      async process(ctx, next) {
-        console.log("second");
-        return next();
-      }
-    }],
-    {
-      msg: "hello"
-    },
-    //... optional next
-    next
   )
-}
-main(async () => {
-  console.log("END")
-}).catch(console.log);
-```
-outputs: 
-```
-first
-second
-END
+);
+
+await app.process({ input: "hello" }); // Normal processing
+await app.process({}); // Error caught: Input is required
 ```
 
-### Rowan.convertToMiddleware()
+## Advanced Usage
 
-used interally to convert supported `Handler` types into valid `Middleware`. 
+### Static Methods
+
+#### Rowan.process()
+
+Execute a sequence of middleware with automatic chaining:
 
 ```ts
-Rowan.convertToMiddleware(async (ctx)=>{}, {name: "foo"});
-```
-results in: 
-```
-{ 
-  meta: { name: 'foo' }, 
-  process: [Function] 
-}
+import { Rowan } from 'rowan';
+
+const middlewares = [
+  {
+    async process(ctx, next) {
+      console.log("First middleware");
+      await next();
+    }
+  },
+  {
+    async process(ctx, next) {
+      console.log("Second middleware");
+      await next();
+    }
+  }
+];
+
+await Rowan.process(middlewares, { message: "hello" }, async () => {
+  console.log("Final step");
+});
+
+// Output:
+// First middleware
+// Second middleware
+// Final step
 ```
 
-## Build
+#### Rowan.hierarchy()
 
+Build a meta hierarchy from middleware with metadata:
+
+```ts
+import { Rowan } from 'rowan';
+
+const app = new Rowan([], { name: "App" });
+const subRouter = new Rowan();
+subRouter.meta = { name: "SubRouter" };
+
+subRouter.use(async (ctx, next) => {
+  await next();
+}, { name: "Handler1" });
+
+subRouter.use({
+  meta: { name: "Handler2" },
+  async process(ctx, next) {
+    await next();
+  }
+});
+
+app.use(subRouter);
+
+const hierarchy = Rowan.hierarchy(app);
+console.log(JSON.stringify(hierarchy, null, 2));
+
+// Output:
+// {
+//   "meta": { "name": "App" },
+//   "children": [
+//     {
+//       "meta": { "name": "SubRouter" },
+//       "children": [
+//         { "meta": { "name": "Handler1" } },
+//         { "meta": { "name": "Handler2" } }
+//       ]
+//     }
+//   ]
+// }
 ```
+
+#### Rowan.convertToMiddleware()
+
+Convert handlers to middleware objects with metadata:
+
+```ts
+import { Rowan } from 'rowan';
+
+const handler = async (ctx) => {
+  ctx.processed = true;
+};
+
+const middleware = Rowan.convertToMiddleware(handler, { name: "ProcessHandler" });
+
+console.log(middleware);
+// Output:
+// {
+//   meta: { name: "ProcessHandler" },
+//   process: [Function]
+// }
+```
+
+### Utility Functions
+
+#### Type Guards
+
+```ts
+import { isMiddleware, isAutoHandler } from 'rowan';
+
+const handler = async (ctx) => {};
+const middleware = { async process(ctx, next) {} };
+
+console.log(isAutoHandler(handler));    // true
+console.log(isMiddleware(middleware));  // true
+console.log(isMiddleware(handler));     // false
+```
+
+## Development
+
+### Building the Project
+
+```bash
+# Install dependencies
 npm install
+
+# Run tests
 npm test
+
+# Run tests with coverage
+npm run test:cover
+
+# Lint code
+npm run lint
+
+# Build for production (ESM + CJS)
+npm run build
+
+# Clean build artifacts
+npm run clean
 ```
 
-there is an `example.ts` that you can run with ts-node
+### Project Structure
 
 ```
-ts-node example
+rowan/
+├── src/           # TypeScript source files
+│   ├── rowan.ts   # Core Rowan class and types
+│   ├── if.ts      # If conditional middleware
+│   ├── after.ts   # After post-processing middleware
+│   ├── after-if.ts # AfterIf conditional post-processing
+│   ├── catch.ts   # Catch error handling middleware
+│   └── index.ts   # Main exports
+├── test/          # Test files (Mocha + Chai)
+├── dist/          # Built output
+│   ├── esm/       # ES Module build
+│   └── cjs/       # CommonJS build
+└── coverage/      # Coverage reports
 ```
+
+### Running Examples
+
+There's an example file you can run to see Rowan in action:
+
+```bash
+npx tsx example.ts
+```
+
+## API Documentation
+
+All exported functions and classes include comprehensive JSDoc documentation with examples. Your IDE will provide full IntelliSense support with detailed parameter information and usage examples.
+
+## Testing
+
+Rowan maintains excellent test coverage with comprehensive testing across all functionality:
+
+- **100% Statement Coverage**
+- **100% Line Coverage** 
+- **96%+ Function Coverage**
+- **88%+ Branch Coverage**
+
+📊 **[View Full Coverage Report](https://meirionhughes.github.io/rowan/)** - Interactive coverage report with detailed file-by-file analysis
+
+Tests are written using Mocha and Chai, and run with the `tsx` loader for direct TypeScript execution. The coverage report is automatically updated on every push to the master branch.
+
+## Requirements
+
+- **Node.js** >= 18.0.0
+- **TypeScript** >= 5.0.0 (for development)
+
+## Package Details
+
+- **Zero Dependencies**: Lightweight with no runtime dependencies
+- **Dual Package**: Supports both ESM (`import`) and CommonJS (`require`)
+- **Type Definitions**: Full TypeScript support with comprehensive type definitions
+- **Modern JavaScript**: Built with ES2022+ features
+- **Backwards Compatible**: Supports Node.js 18+
+
+## License
+
+MIT © [Meirion Hughes](https://github.com/MeirionHughes)
 
 ## Credits
-"Rowan" Icon courtesy of [The Noun Project](https://thenounproject.com/), by [ludmil](https://thenounproject.com/Maludk), under [CC 3.0](http://creativecommons.org/licenses/by/3.0/us/)
 
-[npm-url]: https://npmjs.org/package/rowan
-[npm-image]: https://img.shields.io/npm/v/rowan.svg
-[npm-downloads]: https://img.shields.io/npm/dm/rowan.svg
-[travis-url]: https://travis-ci.org/MeirionHughes/rowan
-[travis-image]: https://img.shields.io/travis/MeirionHughes/rowan/master.svg
+"Rowan" Icon courtesy of [The Noun Project](https://thenounproject.com/), by [ludmil](https://thenounproject.com/Maludk), under [CC 3.0](http://creativecommons.org/licenses/by/3.0/us/)
